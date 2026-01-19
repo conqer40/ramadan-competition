@@ -120,6 +120,11 @@ function updateAuthUI() {
         html += `
                 <button class="btn btn-danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
             </div>
+            <div class="share-promo" style="text-align:center; margin-top:0.5rem;">
+                 <button class="btn btn-gold btn-sm" onclick="shareToWin()">
+                    <i class="fab fa-facebook"></i> شارك واربح نقطة!
+                 </button>
+            </div>
         `;
         container.innerHTML = html;
     } else {
@@ -128,6 +133,43 @@ function updateAuthUI() {
             <button class="btn btn-gold" onclick="showModal('register')">حساب جديد</button>
         `;
     }
+}
+
+async function shareToWin() {
+    if (!currentUser) return showModal('login');
+
+    const url = encodeURIComponent(window.location.origin);
+    const text = encodeURIComponent('شارك في مسابقة رمضانك عندنا واربح جوائز قيمة! 🌙✨');
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+
+    // Open share window
+    window.open(fbUrl, 'fb-share', 'width=580,height=296');
+
+    // Call API to record share and get point
+    // We add a small delay to simulate user actually sharing (naive check)
+    setTimeout(async () => {
+        try {
+            const res = await fetch(`${API}/share-reward`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.id })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                showToast('تم احتساب نقطة المشاركة! 🎉', 'success');
+            } else {
+                // If error is "already collected", just show info
+                if (data.error.includes('حصلت')) {
+                    showToast(data.error, 'info');
+                } else {
+                    console.log(data.error);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }, 5000);
 }
 
 function showModal(type) {
@@ -163,7 +205,13 @@ async function doLogin() {
         localStorage.setItem('user', JSON.stringify(currentUser));
         updateAuthUI();
         closeModal();
+        updateAuthUI();
+        closeModal();
         showToast(`أهلاً ${currentUser.name}! 🌙`, 'success');
+        // Promo for share
+        setTimeout(() => {
+            showToast('نصيحة: شارك الموقع يومياً لتربح نقاط إضافية! 💡', 'info');
+        }, 2000);
         loadCompetition();
     } else {
         showToast(data.error, 'warning');
@@ -437,7 +485,9 @@ async function loadLeaderboard() {
     list.innerHTML = data.map((u, i) => `
         <div class="leaderboard-item ${i < 3 ? 'top-3' : ''} ${currentUser?.id === u.id ? 'me' : ''}">
             <div class="rank">${i + 1}</div>
-            <span class="player-name">${u.name}</span>
+            ${u.facebook_url
+            ? `<a href="${u.facebook_url}" target="_blank" class="player-name player-link">${u.name}</a>`
+            : `<span class="player-name">${u.name}</span>`}
             <span class="player-score">${u.score} نقطة</span>
         </div>
     `).join('') || '<div style="text-align:center; color:var(--text-muted); padding:2rem;">لا توجد بيانات</div>';
@@ -582,11 +632,56 @@ async function openPlaylist(id) {
                         <h4>${v.title}</h4>
                         <span>${v.duration || ''}</span>
                     </div>
-                    <a href="${v.video_url}" target="_blank" class="btn btn-gold">مشاهدة</a>
+                    <button class="btn btn-gold" onclick="playVideo('${v.video_url}', '${v.title}')">مشاهدة</button>
                 </div>
             `).join('') || '<p style="color:var(--text-muted); text-align:center; grid-column:1/-1;">لا توجد فيديوهات</p>'}
         `;
     } catch (e) {
         console.error('Error loading videos:', e);
+    }
+}
+
+// Embedded Video Player Modal
+function playVideo(url, title) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('video-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'video-modal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content video-modal-content">
+                <button class="modal-close" onclick="closeVideoModal()">&times;</button>
+                <h3 id="video-modal-title" style="color:var(--gold); margin-bottom:1rem;"></h3>
+                <div id="video-player-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px;">
+                    <iframe id="video-iframe" style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" allowfullscreen></iframe>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Set video URL and title
+    document.getElementById('video-modal-title').textContent = title;
+
+    // Convert normal YouTube URL to embed format if needed
+    let embedUrl = url;
+    if (url.includes('youtube.com/watch')) {
+        const videoId = url.split('v=')[1]?.split('&')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    } else if (url.includes('youtu.be/')) {
+        const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    document.getElementById('video-iframe').src = embedUrl + '?autoplay=1';
+    modal.classList.add('active');
+}
+
+function closeVideoModal() {
+    const modal = document.getElementById('video-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.getElementById('video-iframe').src = ''; // Stop video
     }
 }

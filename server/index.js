@@ -161,10 +161,11 @@ app.post('/api/register', (req, res) => {
     const passwordHash = bcrypt.hashSync(password, 10);
     const encryptedId = encrypt(national_id);
     const encryptedFomi = fomi ? encrypt(fomi) : null;
+    const fbUrl = req.body.facebook_url || null;
 
-    db.run(`INSERT INTO users (name, phone, national_id_encrypted, fomi_encrypted, password_hash, agreed_terms) 
-            VALUES (?, ?, ?, ?, ?, 1)`,
-        [name, phone, encryptedId, encryptedFomi, passwordHash],
+    db.run(`INSERT INTO users (name, phone, national_id_encrypted, fomi_encrypted, password_hash, agreed_terms, facebook_url) 
+            VALUES (?, ?, ?, ?, ?, 1, ?)`,
+        [name, phone, encryptedId, encryptedFomi, passwordHash, fbUrl],
         function (err) {
             if (err) {
                 if (err.message.includes('UNIQUE')) {
@@ -180,7 +181,7 @@ app.post('/api/register', (req, res) => {
 app.post('/api/login', (req, res) => {
     const { phone, password } = req.body;
 
-    db.get(`SELECT id, name, phone, score, role FROM users WHERE phone = ?`, [phone], (err, user) => {
+    db.get(`SELECT id, name, phone, score, role, facebook_url FROM users WHERE phone = ?`, [phone], (err, user) => {
         if (!user) return res.status(401).json({ error: 'بيانات غير صحيحة' });
 
         db.get(`SELECT password_hash FROM users WHERE id = ?`, [user.id], (err2, passRow) => {
@@ -254,7 +255,7 @@ app.post('/api/submit-answer', (req, res) => {
                     }
 
                     if (isCorrect) {
-                        db.run(`UPDATE users SET score = score + 1, total_time_ms = total_time_ms + ? WHERE id = ?`,
+                        db.run(`UPDATE users SET score = score + 3, total_time_ms = total_time_ms + ? WHERE id = ?`,
                             [timeTakenMs || 0, userId]);
                     }
 
@@ -298,12 +299,34 @@ app.get('/api/my-answer/:userId', (req, res) => {
 
 // Leaderboard
 app.get('/api/leaderboard', (req, res) => {
-    db.all(`SELECT id, name, score, total_time_ms,
-            ROW_NUMBER() OVER (ORDER BY score DESC, total_time_ms ASC) as rank
-            FROM users WHERE role = 'user' ORDER BY score DESC, total_time_ms ASC LIMIT 50`,
-        [], (err, rows) => {
+    getCompetitionStatus((err, status) => {
+        // If status is 'closed_show_result', we show full scores.
+        // If 'open' or 'waiting_fajr', we should hide points from *today's* question to keep it suspenseful.
+        // effectively: displayed_score = total_score - (points_from_today if correct)
+
+        let query = `SELECT id, name, score, total_time_ms, role, facebook_url FROM users WHERE role = 'user'`;
+
+        if (status.season_id && status.day_number && status.status !== 'closed_show_result') {
+            // Subtract points for today's question if they answered it correctly
+            // valid score = score - (is_correct_today * 3)
+            query = `SELECT u.id, u.name, u.total_time_ms, u.role, u.facebook_url,
+                     (u.score - COALESCE((SELECT 3 FROM answers a 
+                                         JOIN questions q ON a.question_id = q.id 
+                                         WHERE a.user_id = u.id 
+                                         AND q.season_id = ${status.season_id} 
+                                         AND q.day_number = ${status.day_number} 
+                                         AND a.is_correct = 1), 0)) as score
+                     FROM users u WHERE u.role = 'user'`;
+        }
+
+        const finalQuery = `SELECT *, ROW_NUMBER() OVER (ORDER BY score DESC, total_time_ms ASC) as rank 
+                            FROM (${query}) as sub
+                            ORDER BY score DESC, total_time_ms ASC LIMIT 50`;
+
+        db.all(finalQuery, [], (err, rows) => {
             res.json(rows || []);
         });
+    });
 });
 
 // ==================== IMSAKIA ROUTES ====================
@@ -722,6 +745,70 @@ app.get('/api/admin/results', (req, res) => {
     });
 });
 
+// ==================== CHALLENGES ROUTES ====================
+
+// Get my challenges status
+app.get('/api/challenges/my-status/:userId', (req, res) => {
+    db.all(`SELECT day_number FROM user_challenges WHERE user_id = ?`, [req.params.userId], (err, rows) => {
+        const completedDays = rows ? rows.map(r => r.day_number) : [];
+        res.json({ completedDays });
+    });
+});
+
+// Complete challenge
+app.post('/api/challenges/complete', (req, res) => {
+    const { userId, dayNumber, points } = req.body;
+
+    db.run(`INSERT INTO user_challenges (user_id, day_number, points) VALUES (?, ?, ?)`,
+        [userId, dayNumber, points],
+        function (err) {
+            if (err) {
+                if (err.message.includes('UNIQUE')) {
+                    return res.json({ success: true, message: 'Completed already' });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+
+            // Update user total score
+            db.run(`UPDATE users SET score = score + ? WHERE id = ?`, [points, userId]);
+            res.json({ success: true });
+        });
+});
+
+// Challenges Leaderboard
+app.get('/api/challenges/leaderboard', (req, res) => {
+    db.all(`SELECT u.name, SUM(uc.points) as total_points, COUNT(uc.day_number) as completed_count
+            FROM user_challenges uc
+            JOIN users u ON uc.user_id = u.id
+            GROUP BY uc.user_id
+            ORDER BY total_points DESC, completed_count DESC
+            LIMIT 50`, [], (err, rows) => {
+        res.json(rows || []);
+    });
+});
+
+// ==================== SHARE REWARD ROUTE ====================
+
+app.post('/api/share-reward', (req, res) => {
+    const { userId } = req.body;
+    const today = getTodayDate();
+
+    db.run(`INSERT INTO share_logs (user_id, share_date) VALUES (?, ?)`,
+        [userId, today],
+        function (err) {
+            if (err) {
+                if (err.message.includes('UNIQUE')) {
+                    return res.status(400).json({ error: 'لقد حصلت على نقاط المشاركة اليوم بالفعل' });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+
+            // Award 1 point
+            db.run(`UPDATE users SET score = score + 1 WHERE id = ?`, [userId]);
+            res.json({ success: true, points: 1 });
+        });
+});
+
 // Start Server
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
@@ -742,7 +829,7 @@ server.listen(PORT, '0.0.0.0', () => {
                     qData.forEach(q => {
                         stmt.run(1, q.day, q.text,
                             q.options[0] || '', q.options[1] || '', q.options[2] || '', q.options[3] || '', q.options[4] || '',
-                            q.correctAnswer + 1, 60, 'published');
+                            q.correctAnswer + 1, 30, 'published'); // Updated to 30s
                     });
                     stmt.finalize();
                     console.log(`Seeded ${qData.length} questions.`);
@@ -751,4 +838,5 @@ server.listen(PORT, '0.0.0.0', () => {
         }
     });
 });
+
 

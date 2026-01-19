@@ -8,7 +8,7 @@ def parse_time(t_str):
     return t_str
 
 try:
-    wb = openpyxl.load_workbook(r'd:\رمضانك عندنا\امساكيه رمضان 2026.xlsx')
+    wb = openpyxl.load_workbook(r'امساكيه رمضان 2026.xlsx')
     sheet = wb.active
     
     days = []
@@ -40,7 +40,7 @@ try:
         }
         days.append(day_data)
 
-    with open(r'd:\رمضانك عندنا\data\imsakia.json', 'w', encoding='utf-8') as f:
+    with open(r'data\imsakia.json', 'w', encoding='utf-8') as f:
         json.dump(days, f, ensure_ascii=False, indent=2)
     
     print(f"Successfully created imsakia.json with {len(days)} days.")

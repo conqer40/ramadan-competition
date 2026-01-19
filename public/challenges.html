@@ -191,6 +191,14 @@
     </div>
 
     <script>
+        const API = '/api';
+        let currentUser = JSON.parse(localStorage.getItem('user'));
+        
+        // Ensure user is logged in
+        if (!currentUser) {
+            window.location.href = '/';
+        }
+
         const challenges = [
             { day: 1, name: 'قراءة الجزء الأول', desc: 'اقرأ الجزء الأول من القرآن', emoji: '📖', points: 100 },
             { day: 2, name: 'صلاة التراويح كاملة', desc: 'صلِّ التراويح كاملة في المسجد', emoji: '🕌', points: 150 },
@@ -224,22 +232,47 @@
             { day: 30, name: 'وداع رمضان', desc: 'ودع رمضان بالدعاء والشكر', emoji: '🤲', points: 200 }
         ];
 
-        let completedChallenges = JSON.parse(localStorage.getItem('challenges_completed') || '[]');
+        let completedChallenges = [];
 
         function getDayOfRamadan() {
-            // For demo, return day 1-30 based on current date
-            return Math.min(30, Math.max(1, new Date().getDate()));
+            // For demo/dev purposes, calculate days from Feb 18 2026
+            const ramadanStart = new Date('2026-02-18');
+            const now = new Date();
+            const diff = now - ramadanStart;
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            // Just clamp it for safety
+            if (days < 1) return 1;
+            if (days > 30) return 30;
+            return days;
         }
 
-        function init() {
+        async function init() {
+            await loadMyStatus();
+            await loadLeaderboard();
             renderTodayChallenge();
             renderAllChallenges();
             updateStats();
         }
 
+        async function loadMyStatus() {
+            try {
+                const res = await fetch(`${API}/challenges/my-status/${currentUser.id}`);
+                const data = await res.json();
+                completedChallenges = data.completedDays || [];
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
         function renderTodayChallenge() {
             const day = getDayOfRamadan();
             const challenge = challenges[day - 1];
+            
+            if (!challenge) {
+                document.getElementById('today-challenge').innerHTML = `<p style="text-align:center; color:white;">رمضان كريم! 🌙</p>`;
+                return;
+            }
+
             const isCompleted = completedChallenges.includes(day);
 
             document.getElementById('today-challenge').innerHTML = `
@@ -249,7 +282,8 @@
                     <div class="challenge-text">${challenge.name}</div>
                     <div style="color:var(--text-muted); margin-bottom:0.5rem;">${challenge.desc}</div>
                     <div class="challenge-reward">🏆 ${challenge.points} نقطة</div>
-                    <button class="btn ${isCompleted ? 'complete-btn done' : 'btn-gold complete-btn'}" onclick="toggleChallenge(${day})">
+                    <button class="btn ${isCompleted ? 'complete-btn done' : 'btn-gold complete-btn'}" 
+                        onclick="completeChallenge(${day}, ${challenge.points})" ${isCompleted ? 'disabled' : ''}>
                         ${isCompleted ? '<i class="fas fa-check"></i> مكتمل!' : 'أكملت التحدي'}
                     </button>
                 </div>
@@ -269,35 +303,78 @@
             `).join('');
         }
 
-        function toggleChallenge(day) {
-            if (completedChallenges.includes(day)) {
-                completedChallenges = completedChallenges.filter(d => d !== day);
-            } else {
+        async function completeChallenge(day, points) {
+            if (completedChallenges.includes(day)) return;
+
+            const res = await fetch(`${API}/challenges/complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.id, dayNumber: day, points })
+            });
+
+            if (res.ok) {
                 completedChallenges.push(day);
+                renderTodayChallenge();
+                renderAllChallenges();
+                updateStats();
+                await loadLeaderboard(); // Refresh leaderboard
             }
-            localStorage.setItem('challenges_completed', JSON.stringify(completedChallenges));
-            renderTodayChallenge();
-            renderAllChallenges();
-            updateStats();
         }
 
         function updateStats() {
             const completed = completedChallenges.length;
-            const points = completedChallenges.reduce((sum, day) => sum + challenges[day - 1].points, 0);
+            const points = completedChallenges.reduce((sum, day) => {
+                const c = challenges.find(ch => ch.day === day);
+                return sum + (c ? c.points : 0);
+            }, 0);
 
             // Calculate streak
             let streak = 0;
             for (let i = getDayOfRamadan(); i >= 1; i--) {
-                if (completedChallenges.includes(i)) {
-                    streak++;
-                } else {
-                    break;
-                }
+                if (completedChallenges.includes(i)) streak++;
+                else break;
             }
 
             document.getElementById('completed-count').textContent = completed;
             document.getElementById('streak').textContent = streak;
             document.getElementById('points').textContent = points;
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch(`${API}/challenges/leaderboard`);
+                const data = await res.json();
+                
+                const html = `
+                    <div class="stat-card" style="grid-column: 1 / -1; margin-top: 1rem; text-align: right;">
+                        <h3 style="color:var(--gold); margin-bottom:1rem; text-align:center;">🏆 ترتيب أبطال التحديات</h3>
+                        ${data.length ? `
+                            <div class="challenges-leaderboard-list">
+                                ${data.map((u, i) => `
+                                    <div class="challenge-item" style="padding:0.75rem;">
+                                        <div class="challenge-day" style="font-size:1.2rem; width:35px; height:35px;">${i + 1}</div>
+                                        <div class="challenge-info">
+                                            <div class="challenge-name">${u.name}</div>
+                                        </div>
+                                        <div style="font-weight:bold; color:var(--gold);">${u.total_points}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p style="text-align:center;">كن أول من يشارك!</p>'}
+                    </div>
+                `;
+                
+                // Append to stats grid or creating a new section? 
+                // Let's insert it after stats-grid
+                let lbContainer = document.getElementById('challenges-leaderboard');
+                if (!lbContainer) {
+                    lbContainer = document.createElement('div');
+                    lbContainer.id = 'challenges-leaderboard';
+                    document.querySelector('.stats-grid').after(lbContainer);
+                }
+                lbContainer.innerHTML = html;
+
+            } catch (e) { console.error('Error loading leaderboard', e); }
         }
 
         init();

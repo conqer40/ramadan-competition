@@ -33,11 +33,13 @@ setTimeout(() => {
                     'سبتمبر': '09', 'أكتوبر': '10', 'نوفمبر': '11', 'ديسمبر': '12'
                 };
 
-                const match = dateStr.match(/(\d+)\s+(\S+)،?\s*(\d+)/);
+                const match = dateStr.match(/(\d+)\s+([^\s،0-9]+)(?:،)?\s*(\d+)/);
                 let formattedDate = dateStr;
                 if (match) {
                     const d = match[1].padStart(2, '0');
-                    const m = months[match[2]] || '01';
+                    const monthName = match[2].trim();
+                    // Handle potential trailing comma captured if regex wasn't perfect, though [^\s،] should prevent it
+                    const m = months[monthName] || '01';
                     const y = match[3];
                     formattedDate = `${y}-${m}-${d}`;
                 }

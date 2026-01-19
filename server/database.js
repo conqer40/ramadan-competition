@@ -48,9 +48,10 @@ function initDb() {
             fomi_encrypted TEXT,
             password_hash TEXT NOT NULL,
             agreed_terms BOOLEAN DEFAULT 0,
+            facebook_url TEXT,
+            role TEXT DEFAULT 'user',
             score INTEGER DEFAULT 0,
             total_time_ms INTEGER DEFAULT 0,
-            role TEXT DEFAULT 'user',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
@@ -146,6 +147,27 @@ function initDb() {
             duration TEXT,
             sort_order INTEGER DEFAULT 0,
             FOREIGN KEY(playlist_id) REFERENCES playlists(id)
+        )`);
+
+        // User Challenges (New)
+        db.run(`CREATE TABLE IF NOT EXISTS user_challenges (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            day_number INTEGER NOT NULL,
+            points INTEGER DEFAULT 0,
+            completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, day_number),
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )`);
+
+        // Share Logs (New)
+        db.run(`CREATE TABLE IF NOT EXISTS share_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            share_date DATE NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, share_date),
+            FOREIGN KEY(user_id) REFERENCES users(id)
         )`);
 
         // Create default season for 2026
