@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .admin-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-title {
+            font-size: 1.75rem;
+            color: var(--gold);
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .admin-tab.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .admin-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .admin-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-card-title i {
+            color: var(--gold);
+        }
+
+        .data-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .data-row.header {
+            background: rgba(212, 175, 55, 0.1);
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-white);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .action-btn.delete:hover {
+            border-color: #f87171;
+            color: #f87171;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .badge.published {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+
+        .badge.draft {
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+        }
+
+        .badge.admin {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .badge.user {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            color: var(--gold);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            color: var(--gold);
+            margin-bottom: 2rem;
+        }
+
+        .login-error {
+            color: #f87171;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .data-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-box">
+            <h1 class="login-title">🔐 لوحة التحكم</h1>
+            <div id="login-error" class="login-error">بيانات غير صحيحة</div>
+            <div class="form-group" style="margin-bottom:1rem;">
+                <input type="tel" id="admin-phone" class="form-input" placeholder="رقم الهاتف">
+            </div>
+            <div class="form-group" style="margin-bottom:1.5rem;">
+                <input type="password" id="admin-pass" class="form-input" placeholder="كلمة المرور">
+            </div>
+            <button class="btn btn-gold" style="width:100%;" onclick="adminLogin()">دخول</button>
+            <a href="/" style="display:block; margin-top:1.5rem; color:var(--text-muted);">← العودة للموقع</a>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel -->
+    <div id="admin-panel" class="admin-container" style="display:none;">
+        <div class="admin-header">
+            <h1 class="admin-title"><i class="fas fa-cog"></i> لوحة التحكم</h1>
+            <div>
+                <span id="admin-name" style="color:var(--gold); margin-left:1rem;"></span>
+                <a href="/" class="btn btn-outline"><i class="fas fa-home"></i> الرئيسية</a>
+                <button class="btn btn-danger" style="margin-right:0.5rem;" onclick="adminLogout()"><i
+                        class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid"></div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="showTab('settings')"><i class="fas fa-sliders-h"></i>
+                الإعدادات</button>
+            <button class="admin-tab" onclick="showTab('users')"><i class="fas fa-users"></i> المستخدمين</button>
+            <button class="admin-tab" onclick="showTab('questions')"><i class="fas fa-question-circle"></i>
+                الأسئلة</button>
+            <button class="admin-tab" onclick="showTab('results')"><i class="fas fa-trophy"></i> النتائج</button>
+            <button class="admin-tab" onclick="showTab('content')"><i class="fas fa-book"></i> المحتوى</button>
+            <button class="admin-tab" onclick="showTab('playlists')"><i class="fas fa-video"></i> البرامج</button>
+            <button class="admin-tab" onclick="showTab('notifications')"><i class="fas fa-bell"></i> الإشعارات</button>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="section-settings" class="admin-section active">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-globe"></i> وضع الموقع</span>
+                </div>
+                <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+                    <button id="mode-coming-soon" class="btn btn-outline" onclick="setSiteMode('coming-soon')"
+                        style="flex:1; min-width:200px; padding:1.5rem;">
+                        <div style="font-size:2rem; margin-bottom:0.5rem;">🔒</div>
+                        <div style="font-weight:700;">Coming Soon</div>
+                        <div style="font-size:0.85rem; color:var(--text-muted);">صفحة الانتظار مع العداد</div>
+                    </button>
+                    <button id="mode-live" class="btn btn-outline" onclick="setSiteMode('live')"
+                        style="flex:1; min-width:200px; padding:1.5rem;">
+                        <div style="font-size:2rem; margin-bottom:0.5rem;">🚀</div>
+                        <div style="font-weight:700;">موقع مباشر</div>
+                        <div style="font-size:0.85rem; color:var(--text-muted);">الموقع متاح للجميع</div>
+                    </button>
+                </div>
+                <p style="color:var(--text-muted); font-size:0.9rem;">
+                    <strong>الوضع الحالي:</strong> <span id="current-mode-text">--</span>
+                </p>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.5rem;">
+                    • <strong>Coming Soon:</strong> الزوار يرون صفحة انتظار بعداد تنازلي لرمضان ومميزات الموقع<br>
+                    • <strong>موقع مباشر:</strong> الموقع يعمل بشكل كامل للجميع
+                </p>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="section-users" class="admin-section">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-users"></i> إدارة المستخدمين</span>
+                    <button class="btn btn-gold" onclick="showUserModal()"><i class="fas fa-plus"></i> إضافة</button>
+                </div>
+                <div class="data-grid" id="users-list"></div>
+            </div>
+        </div>
+
+        <!-- Questions Section -->
+        <div id="section-questions" class="admin-section">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-question-circle"></i> إدارة الأسئلة</span>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button class="btn btn-outline" onclick="importQuestions()"><i class="fas fa-file-import"></i>
+                            استيراد 30 سؤال</button>
+                        <button class="btn btn-gold" onclick="showQuestionModal()"><i class="fas fa-plus"></i> إضافة
+                            سؤال</button>
+                    </div>
+                </div>
+                <p style="color:var(--text-muted); margin-bottom:1rem;">
+                    الأسئلة تظهر تلقائياً للمستخدمين من أذان الفجر حتى أذان المغرب حسب اليوم المحدد.
+                </p>
+                <div class="data-grid" id="questions-list"></div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="section-results" class="admin-section">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-trophy"></i> ترتيب المتسابقين والدرجات</span>
+                </div>
+                <div class="data-grid" id="results-list"></div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div id="section-content" class="admin-section">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-book"></i> إدارة المحتوى (الأذكار)</span>
+                    <button class="btn btn-gold" onclick="showContentModal()"><i class="fas fa-plus"></i> إضافة</button>
+                </div>
+                <div class="data-grid" id="content-list"></div>
+            </div>
+        </div>
+
+        <!-- Playlists Section -->
+        <div id="section-playlists" class="admin-section">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-video"></i> قوائم التشغيل (البرامج)</span>
+                    <button class="btn btn-gold" onclick="showPlaylistModal()"><i class="fas fa-plus"></i> إضافة
+                        قائمة</button>
+                </div>
+                <div class="data-grid" id="playlists-list"></div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="section-notifications" class="admin-section">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title"><i class="fas fa-bell"></i> إرسال إشعار</span>
+                </div>
+                <textarea id="notify-msg" class="form-input" rows="4" placeholder="نص الإشعار..."></textarea>
+                <select id="notify-type" class="form-input" style="margin-top:1rem;">
+                    <option value="info">إشعار عام</option>
+                    <option value="warning">تنبيه</option>
+                    <option value="success">تهنئة</option>
+                </select>
+                <button class="btn btn-gold" style="margin-top:1rem;" onclick="sendNotification()">إرسال للجميع</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="user-modal-title">إضافة مستخدم</h3>
+                <button class="action-btn" onclick="closeModal('user-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="user-id">
+            <div class="form-row">
+                <div><label class="form-label">الاسم</label><input type="text" id="user-name" class="form-input"></div>
+                <div><label class="form-label">الهاتف</label><input type="tel" id="user-phone" class="form-input"></div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">كلمة المرور</label><input type="password" id="user-password"
+                        class="form-input"></div>
+                <div><label class="form-label">الدور</label>
+                    <select id="user-role" class="form-input">
+                        <option value="user">مستخدم</option>
+                        <option value="admin">مدير</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">النقاط</label><input type="number" id="user-score" class="form-input"
+                        value="0"></div>
+            </div>
+            <button class="btn btn-gold" style="width:100%;" onclick="saveUser()">حفظ</button>
+        </div>
+    </div>
+
+    <!-- Question Modal -->
+    <div id="question-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="question-modal-title">إضافة سؤال</h3>
+                <button class="action-btn" onclick="closeModal('question-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="q-id">
+            <div class="form-row">
+                <div>
+                    <label class="form-label">اختر اليوم (من 1 إلى 30)</label>
+                    <select id="q-day" class="form-input">
+                        ${Array.from({length: 30}, (_, i) => `<option value="${i+1}">اليوم ${i+1}</option>`).join('')}
+                    </select>
+                </div>
+                <div><label class="form-label">الوقت (ثانية)</label><input type="number" id="q-timer" class="form-input"
+                        value="60"></div>
+            </div>
+            <div class="form-row full">
+                <div><label class="form-label">السؤال</label><textarea id="q-text" class="form-input"
+                        rows="3"></textarea></div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">الخيار 1</label><input type="text" id="q-opt1" class="form-input"></div>
+                <div><label class="form-label">الخيار 2</label><input type="text" id="q-opt2" class="form-input"></div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">الخيار 3</label><input type="text" id="q-opt3" class="form-input"></div>
+                <div><label class="form-label">الخيار 4</label><input type="text" id="q-opt4" class="form-input"></div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">الخيار 5 (اختياري)</label><input type="text" id="q-opt5"
+                        class="form-input"></div>
+                <div><label class="form-label">الإجابة الصحيحة</label>
+                    <select id="q-correct" class="form-input">
+                        <option value="1">الخيار 1</option>
+                        <option value="2">الخيار 2</option>
+                        <option value="3">الخيار 3</option>
+                        <option value="4">الخيار 4</option>
+                        <option value="5">الخيار 5</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">الحالة</label>
+                    <select id="q-status" class="form-input">
+                        <option value="draft">مسودة (غير منشور)</option>
+                        <option value="published">منشور (سيظهر تلقائياً)</option>
+                    </select>
+                </div>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">
+                ⏰ السؤال سيظهر تلقائياً في اليوم المحدد من أذان الفجر حتى المغرب
+            </p>
+            <button class="btn btn-gold" style="width:100%;" onclick="saveQuestion()">حفظ</button>
+        </div>
+    </div>
+
+    <!-- Content Modal -->
+    <div id="content-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="content-modal-title">إضافة محتوى</h3>
+                <button class="action-btn" onclick="closeModal('content-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="content-id">
+            <div class="form-row">
+                <div><label class="form-label">النوع</label>
+                    <select id="content-type" class="form-input">
+                        <option value="azkar_morning">أذكار الصباح</option>
+                        <option value="azkar_evening">أذكار المساء</option>
+                    </select>
+                </div>
+                <div><label class="form-label">الترتيب</label><input type="number" id="content-order" class="form-input"
+                        value="0"></div>
+            </div>
+            <div class="form-row full">
+                <div><label class="form-label">العنوان</label><input type="text" id="content-title" class="form-input">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div><label class="form-label">المحتوى</label><textarea id="content-body" class="form-input"
+                        rows="5"></textarea></div>
+            </div>
+            <button class="btn btn-gold" style="width:100%;" onclick="saveContent()">حفظ</button>
+        </div>
+    </div>
+
+    <!-- Playlist Modal -->
+    <div id="playlist-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="playlist-modal-title">إضافة قائمة تشغيل</h3>
+                <button class="action-btn" onclick="closeModal('playlist-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="playlist-id">
+            <div class="form-row full">
+                <div><label class="form-label">العنوان</label><input type="text" id="playlist-title" class="form-input">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div><label class="form-label">الوصف</label><textarea id="playlist-desc" class="form-input"
+                        rows="3"></textarea></div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">صورة الغلاف</label><input type="text" id="playlist-thumb"
+                        class="form-input" placeholder="رابط الصورة"></div>
+                <div><label class="form-label">الترتيب</label><input type="number" id="playlist-order"
+                        class="form-input" value="0"></div>
+            </div>
+            <button class="btn btn-gold" style="width:100%;" onclick="savePlaylist()">حفظ</button>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة فيديو</h3>
+                <button class="action-btn" onclick="closeModal('video-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="video-id">
+            <input type="hidden" id="video-playlist-id">
+            <div class="form-row full">
+                <div><label class="form-label">عنوان الفيديو</label><input type="text" id="video-title"
+                        class="form-input"></div>
+            </div>
+            <div class="form-row full">
+                <div><label class="form-label">رابط الفيديو (YouTube)</label><input type="text" id="video-url"
+                        class="form-input" placeholder="https://youtube.com/watch?v=..."></div>
+            </div>
+            <div class="form-row">
+                <div><label class="form-label">صورة مصغرة</label><input type="text" id="video-thumb" class="form-input">
+                </div>
+                <div><label class="form-label">المدة</label><input type="text" id="video-duration" class="form-input"
+                        placeholder="10:30"></div>
+            </div>
+            <button class="btn btn-gold" style="width:100%;" onclick="saveVideo()">حفظ</button>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api';
+        let adminUser = null;
+
+        // Check login on load
+        document.addEventListener('DOMContentLoaded', () => {
+            adminUser = JSON.parse(localStorage.getItem('admin'));
+            if (adminUser && adminUser.role === 'admin') {
+                showAdminPanel();
+            }
+
+            // Generate day options
+            const daySelect = document.getElementById('q-day');
+            daySelect.innerHTML = Array.from({ length: 30 }, (_, i) =>
+                `<option value="${i + 1}">اليوم ${i + 1}</option>`
+            ).join('');
+        });
+
+        async function adminLogin() {
+            const phone = document.getElementById('admin-phone').value;
+            const password = document.getElementById('admin-pass').value;
+
+            try {
+                const res = await fetch(`${API}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.user.role === 'admin') {
+                    adminUser = data.user;
+                    localStorage.setItem('admin', JSON.stringify(adminUser));
+                    showAdminPanel();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                    document.getElementById('login-error').textContent = data.user?.role !== 'admin' ? 'هذا الحساب ليس أدمن' : 'بيانات غير صحيحة';
+                }
+            } catch (e) {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        function adminLogout() {
+            adminUser = null;
+            localStorage.removeItem('admin');
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('admin-panel').style.display = 'none';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('admin-name').textContent = adminUser.name;
+            loadStats();
+            loadSiteMode();
+            loadUsers();
+            loadQuestions();
+            loadResults();
+            loadContent();
+            loadPlaylists();
+        }
+
+        // Site Mode
+        async function loadSiteMode() {
+            const res = await fetch(`${API}/admin/site-mode`);
+            const data = await res.json();
+            updateSiteModeUI(data.mode);
+        }
+
+        function updateSiteModeUI(mode) {
+            document.getElementById('current-mode-text').textContent = mode === 'coming-soon' ? '🔒 Coming Soon' : '🚀 موقع مباشر';
+            document.getElementById('mode-coming-soon').style.borderColor = mode === 'coming-soon' ? 'var(--gold)' : 'var(--border)';
+            document.getElementById('mode-coming-soon').style.background = mode === 'coming-soon' ? 'rgba(212,175,55,0.1)' : 'transparent';
+            document.getElementById('mode-live').style.borderColor = mode === 'live' ? 'var(--gold)' : 'var(--border)';
+            document.getElementById('mode-live').style.background = mode === 'live' ? 'rgba(212,175,55,0.1)' : 'transparent';
+        }
+
+        async function setSiteMode(mode) {
+            const res = await fetch(`${API}/admin/site-mode`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+            const data = await res.json();
+            if (data.success) {
+                updateSiteModeUI(data.mode);
+                alert(mode === 'coming-soon' ? '✅ تم تفعيل وضع Coming Soon' : '✅ تم تفعيل الموقع المباشر');
+            }
+        }
+
+        // Tabs
+        function showTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`section-${tab}`).classList.add('active');
+        }
+
+        // Modals
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // Stats
+        async function loadStats() {
+            const res = await fetch(`${API}/admin/stats`);
+            const stats = await res.json();
+            document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-box"><div class="stat-value">${stats.total_users || 0}</div><div class="stat-label">مستخدم</div></div>
+        <div class="stat-box"><div class="stat-value">${stats.total_answers || 0}</div><div class="stat-label">إجابة</div></div>
+        <div class="stat-box"><div class="stat-value">${stats.published_questions || 0}</div><div class="stat-label">سؤال</div></div>
+        <div class="stat-box"><div class="stat-value">${stats.total_content || 0}</div><div class="stat-label">محتوى</div></div>
+        <div class="stat-box"><div class="stat-value">${stats.total_playlists || 0}</div><div class="stat-label">قائمة</div></div>
+    `;
+        }
+
+        // ========== USERS ==========
+        async function loadUsers() {
+            const res = await fetch(`${API}/admin/users`);
+            const users = await res.json();
+            document.getElementById('users-list').innerHTML = users.map(u => `
+        <div class="data-row">
+            <span>${u.name}</span>
+            <span>${u.phone}</span>
+            <span><span class="badge ${u.role}">${u.role === 'admin' ? 'مدير' : 'مستخدم'}</span></span>
+            <span>${u.score || 0} نقطة</span>
+            <div>
+                <button class="action-btn" onclick="editUser(${u.id})"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+        }
+
+        function showUserModal(id = null) {
+            document.getElementById('user-modal-title').textContent = id ? 'تعديل مستخدم' : 'إضافة مستخدم';
+            document.getElementById('user-id').value = id || '';
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-phone').value = '';
+            document.getElementById('user-password').value = '';
+            document.getElementById('user-role').value = 'user';
+            document.getElementById('user-score').value = '0';
+            document.getElementById('user-modal').classList.add('active');
+        }
+
+        async function editUser(id) {
+            const res = await fetch(`${API}/admin/users/${id}`);
+            const u = await res.json();
+            document.getElementById('user-modal-title').textContent = 'تعديل مستخدم';
+            document.getElementById('user-id').value = u.id;
+            document.getElementById('user-name').value = u.name;
+            document.getElementById('user-phone').value = u.phone;
+            document.getElementById('user-role').value = u.role;
+            document.getElementById('user-score').value = u.score || 0;
+            document.getElementById('user-modal').classList.add('active');
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('user-id').value;
+            const data = {
+                name: document.getElementById('user-name').value,
+                phone: document.getElementById('user-phone').value,
+                password: document.getElementById('user-password').value,
+                role: document.getElementById('user-role').value,
+                score: parseInt(document.getElementById('user-score').value)
+            };
+
+            if (id) {
+                await fetch(`${API}/admin/users/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            } else {
+                await fetch(`${API}/admin/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            }
+            closeModal('user-modal');
+            loadUsers();
+            loadStats();
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            await fetch(`${API}/admin/users/${id}`, { method: 'DELETE' });
+            loadUsers();
+            loadStats();
+        }
+
+        // ========== QUESTIONS ==========
+        async function loadQuestions() {
+            const res = await fetch(`${API}/admin/questions`);
+            const questions = await res.json();
+            document.getElementById('questions-list').innerHTML = questions.map(q => `
+        <div class="data-row">
+            <span>🗓️ يوم ${q.day_number}</span>
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${q.question_text}</span>
+            <span><span class="badge ${q.status}">${q.status === 'published' ? '✅ منشور' : '📝 مسودة'}</span></span>
+            <span>${q.total_answers || 0} إجابة</span>
+            <div>
+                <button class="action-btn" onclick="editQuestion(${q.id})"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete" onclick="deleteQuestion(${q.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('') || '<p style="color:var(--text-muted); padding:1rem;">لا توجد أسئلة - أضف أسئلة لكل يوم من أيام رمضان</p>';
+        }
+
+        async function importQuestions() {
+            if (!confirm('هل تريد استيراد 30 سؤال رمضان؟ سيتم استبدال الأسئلة الموجودة.')) return;
+            try {
+                const res = await fetch(`${API}/admin/import-questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ season_id: 1 })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ تم استيراد ${data.count} سؤال بنجاح!`);
+                    loadQuestions();
+                    loadStats();
+                } else {
+                    alert('❌ خطأ: ' + data.error);
+                }
+            } catch (e) {
+                alert('❌ حدث خطأ في الاستيراد');
+            }
+        }
+
+        function showQuestionModal() {
+            document.getElementById('question-modal-title').textContent = 'إضافة سؤال';
+            document.getElementById('q-id').value = '';
+            ['q-text', 'q-opt1', 'q-opt2', 'q-opt3', 'q-opt4', 'q-opt5'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('q-day').value = '1';
+            document.getElementById('q-timer').value = '60';
+            document.getElementById('q-correct').value = '1';
+            document.getElementById('q-status').value = 'published';
+            document.getElementById('question-modal').classList.add('active');
+        }
+
+        async function editQuestion(id) {
+            const res = await fetch(`${API}/admin/questions`);
+            const questions = await res.json();
+            const q = questions.find(x => x.id === id);
+            document.getElementById('question-modal-title').textContent = 'تعديل سؤال';
+            document.getElementById('q-id').value = q.id;
+            document.getElementById('q-day').value = q.day_number;
+            document.getElementById('q-timer').value = q.timer_seconds;
+            document.getElementById('q-text').value = q.question_text;
+            document.getElementById('q-opt1').value = q.option1;
+            document.getElementById('q-opt2').value = q.option2;
+            document.getElementById('q-opt3').value = q.option3 || '';
+            document.getElementById('q-opt4').value = q.option4 || '';
+            document.getElementById('q-opt5').value = q.option5 || '';
+            document.getElementById('q-correct').value = q.correct_answer;
+            document.getElementById('q-status').value = q.status;
+            document.getElementById('question-modal').classList.add('active');
+        }
+
+        async function saveQuestion() {
+            const id = document.getElementById('q-id').value;
+            const data = {
+                season_id: 1,
+                day_number: parseInt(document.getElementById('q-day').value),
+                timer_seconds: parseInt(document.getElementById('q-timer').value),
+                question_text: document.getElementById('q-text').value,
+                option1: document.getElementById('q-opt1').value,
+                option2: document.getElementById('q-opt2').value,
+                option3: document.getElementById('q-opt3').value,
+                option4: document.getElementById('q-opt4').value,
+                option5: document.getElementById('q-opt5').value,
+                correct_answer: parseInt(document.getElementById('q-correct').value),
+                status: document.getElementById('q-status').value
+            };
+
+            if (id) {
+                await fetch(`${API}/admin/questions/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            } else {
+                await fetch(`${API}/admin/question`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            }
+            closeModal('question-modal');
+            loadQuestions();
+            loadStats();
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            await fetch(`${API}/admin/questions/${id}`, { method: 'DELETE' });
+            loadQuestions();
+            loadStats();
+        }
+
+        // ========== RESULTS ==========
+        async function loadResults() {
+            const res = await fetch(`${API}/admin/results`);
+            const results = await res.json();
+            document.getElementById('results-list').innerHTML = `
+        <div class="data-row header">
+            <span>الترتيب</span><span>الاسم</span><span>الهاتف</span><span>النقاط</span><span>الإجابات الصحيحة</span>
+        </div>
+        ${results.map(r => `
+            <div class="data-row">
+                <span>🏅 #${r.rank}</span>
+                <span>${r.name}</span>
+                <span>${r.phone}</span>
+                <span style="color:var(--gold); font-weight:600;">${r.score} نقطة</span>
+                <span>${r.correct_answers}/${r.total_answers}</span>
+            </div>
+        `).join('') || '<p style="color:var(--text-muted);">لا توجد نتائج بعد</p>'}
+    `;
+        }
+
+        // ========== CONTENT ==========
+        async function loadContent() {
+            const res = await fetch(`${API}/admin/content`);
+            const content = await res.json();
+            document.getElementById('content-list').innerHTML = content.map(c => `
+        <div class="data-row">
+            <span>${c.type === 'azkar_morning' ? '🌅 صباح' : '🌙 مساء'}</span>
+            <span>${c.title}</span>
+            <span>${c.is_active ? '✅ نشط' : '❌ غير نشط'}</span>
+            <span></span>
+            <div>
+                <button class="action-btn" onclick="editContent(${c.id})"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete" onclick="deleteContent(${c.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+        }
+
+        function showContentModal() {
+            document.getElementById('content-modal-title').textContent = 'إضافة محتوى';
+            document.getElementById('content-id').value = '';
+            document.getElementById('content-type').value = 'azkar_morning';
+            document.getElementById('content-title').value = '';
+            document.getElementById('content-body').value = '';
+            document.getElementById('content-order').value = '0';
+            document.getElementById('content-modal').classList.add('active');
+        }
+
+        async function editContent(id) {
+            const res = await fetch(`${API}/admin/content`);
+            const items = await res.json();
+            const c = items.find(x => x.id === id);
+            document.getElementById('content-modal-title').textContent = 'تعديل محتوى';
+            document.getElementById('content-id').value = c.id;
+            document.getElementById('content-type').value = c.type;
+            document.getElementById('content-title').value = c.title;
+            document.getElementById('content-body').value = c.body;
+            document.getElementById('content-order').value = c.sort_order;
+            document.getElementById('content-modal').classList.add('active');
+        }
+
+        async function saveContent() {
+            const id = document.getElementById('content-id').value;
+            const data = {
+                type: document.getElementById('content-type').value,
+                title: document.getElementById('content-title').value,
+                body: document.getElementById('content-body').value,
+                sort_order: parseInt(document.getElementById('content-order').value),
+                is_active: true
+            };
+
+            if (id) {
+                await fetch(`${API}/admin/content/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            } else {
+                await fetch(`${API}/admin/content`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            }
+            closeModal('content-modal');
+            loadContent();
+            loadStats();
+        }
+
+        async function deleteContent(id) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            await fetch(`${API}/admin/content/${id}`, { method: 'DELETE' });
+            loadContent();
+            loadStats();
+        }
+
+        // ========== PLAYLISTS ==========
+        async function loadPlaylists() {
+            const res = await fetch(`${API}/admin/playlists`);
+            const playlists = await res.json();
+            document.getElementById('playlists-list').innerHTML = playlists.map(p => `
+        <div class="data-row">
+            <span>📺 ${p.title}</span>
+            <span>${p.description || '-'}</span>
+            <span>${p.video_count || 0} فيديو</span>
+            <span></span>
+            <div>
+                <button class="action-btn" onclick="manageVideos(${p.id})" title="إدارة الفيديوهات"><i class="fas fa-list"></i></button>
+                <button class="action-btn" onclick="editPlaylist(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete" onclick="deletePlaylist(${p.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('') || '<p style="color:var(--text-muted);">لا توجد قوائم - أضف قوائم تشغيل للبرامج</p>';
+        }
+
+        function showPlaylistModal() {
+            document.getElementById('playlist-modal-title').textContent = 'إضافة قائمة تشغيل';
+            document.getElementById('playlist-id').value = '';
+            document.getElementById('playlist-title').value = '';
+            document.getElementById('playlist-desc').value = '';
+            document.getElementById('playlist-thumb').value = '';
+            document.getElementById('playlist-order').value = '0';
+            document.getElementById('playlist-modal').classList.add('active');
+        }
+
+        async function editPlaylist(id) {
+            const res = await fetch(`${API}/admin/playlists/${id}`);
+            const p = await res.json();
+            document.getElementById('playlist-modal-title').textContent = 'تعديل قائمة';
+            document.getElementById('playlist-id').value = p.id;
+            document.getElementById('playlist-title').value = p.title;
+            document.getElementById('playlist-desc').value = p.description || '';
+            document.getElementById('playlist-thumb').value = p.thumbnail_url || '';
+            document.getElementById('playlist-order').value = p.sort_order;
+            document.getElementById('playlist-modal').classList.add('active');
+        }
+
+        async function savePlaylist() {
+            const id = document.getElementById('playlist-id').value;
+            const data = {
+                title: document.getElementById('playlist-title').value,
+                description: document.getElementById('playlist-desc').value,
+                thumbnail_url: document.getElementById('playlist-thumb').value,
+                sort_order: parseInt(document.getElementById('playlist-order').value),
+                is_active: true
+            };
+
+            if (id) {
+                await fetch(`${API}/admin/playlists/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            } else {
+                await fetch(`${API}/admin/playlists`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            }
+            closeModal('playlist-modal');
+            loadPlaylists();
+            loadStats();
+        }
+
+        async function deletePlaylist(id) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            await fetch(`${API}/admin/playlists/${id}`, { method: 'DELETE' });
+            loadPlaylists();
+            loadStats();
+        }
+
+        async function manageVideos(playlistId) {
+            const res = await fetch(`${API}/admin/playlists/${playlistId}`);
+            const playlist = await res.json();
+
+            let html = `<h3 style="margin-bottom:1rem;">📺 فيديوهات: ${playlist.title}</h3>`;
+            html += `<button class="btn btn-gold" style="margin-bottom:1rem;" onclick="showVideoModal(${playlistId})"><i class="fas fa-plus"></i> إضافة فيديو</button>`;
+
+            if (playlist.videos.length) {
+                html += playlist.videos.map(v => `
+            <div class="data-row">
+                <span>🎬 ${v.title}</span>
+                <span>${v.duration || '-'}</span>
+                <span></span><span></span>
+                <div>
+                    <button class="action-btn delete" onclick="deleteVideo(${v.id}, ${playlistId})"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+            } else {
+                html += '<p style="color:var(--text-muted);">لا توجد فيديوهات - أضف فيديوهات للقائمة</p>';
+            }
+
+            document.getElementById('playlists-list').innerHTML = `
+        <button class="btn btn-outline" style="margin-bottom:1rem;" onclick="loadPlaylists()"><i class="fas fa-arrow-right"></i> رجوع</button>
+        ${html}
+    `;
+        }
+
+        function showVideoModal(playlistId) {
+            document.getElementById('video-id').value = '';
+            document.getElementById('video-playlist-id').value = playlistId;
+            document.getElementById('video-title').value = '';
+            document.getElementById('video-url').value = '';
+            document.getElementById('video-thumb').value = '';
+            document.getElementById('video-duration').value = '';
+            document.getElementById('video-modal').classList.add('active');
+        }
+
+        async function saveVideo() {
+            const playlistId = document.getElementById('video-playlist-id').value;
+            const data = {
+                title: document.getElementById('video-title').value,
+                video_url: document.getElementById('video-url').value,
+                thumbnail_url: document.getElementById('video-thumb').value,
+                duration: document.getElementById('video-duration').value
+            };
+
+            await fetch(`${API}/admin/playlists/${playlistId}/videos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            closeModal('video-modal');
+            manageVideos(playlistId);
+        }
+
+        async function deleteVideo(id, playlistId) {
+            if (!confirm('هل أنت متأكد من الحذف؟')) return;
+            await fetch(`${API}/admin/videos/${id}`, { method: 'DELETE' });
+            manageVideos(playlistId);
+        }
+
+        // ========== NOTIFICATIONS ==========
+        async function sendNotification() {
+            const message = document.getElementById('notify-msg').value;
+            const type = document.getElementById('notify-type').value;
+            if (!message) return alert('اكتب رسالة!');
+
+            await fetch(`${API}/admin/notify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, type }) });
+            document.getElementById('notify-msg').value = '';
+            alert('تم الإرسال! 📢');
+        }
+    </script>
+
+</body>
+
+</html>

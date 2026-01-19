@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول الختمة - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .khatmah-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .khatmah-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .khatmah-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .khatmah-subtitle {
+            color: var(--text-muted);
+        }
+
+        .progress-overview {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 26, 122, 0.2));
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .main-progress {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .main-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), #4ade80);
+            border-radius: 15px;
+            transition: width 0.5s;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .day-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .day-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        .day-card.completed {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #4ade80;
+        }
+
+        .day-card.current {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+        }
+
+        .day-number {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .juz-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .day-status {
+            margin-top: 0.5rem;
+        }
+
+        .check-icon {
+            color: #4ade80;
+            font-size: 1.25rem;
+        }
+
+        .pages-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .reset-btn {
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="khatmah-container">
+        <div class="khatmah-header">
+            <h1 class="khatmah-title">📅 جدول ختم القرآن</h1>
+            <p class="khatmah-subtitle">اختم القرآن في رمضان - جزء كل يوم</p>
+        </div>
+
+        <div class="progress-overview">
+            <div class="progress-stats">
+                <div class="stat">
+                    <div class="stat-value" id="completed-count">0</div>
+                    <div class="stat-label">جزء مكتمل</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="remaining-count">30</div>
+                    <div class="stat-label">جزء متبقي</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="percent">0%</div>
+                    <div class="stat-label">نسبة الإنجاز</div>
+                </div>
+            </div>
+            <div class="main-progress">
+                <div class="main-progress-fill" id="main-progress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="days-grid" id="days-grid"></div>
+
+        <button class="btn btn-outline reset-btn" onclick="resetProgress()">
+            <i class="fas fa-redo"></i> إعادة تعيين التقدم
+        </button>
+    </div>
+
+    <script>
+        const juzData = [
+            { juz: 1, surahs: 'الفاتحة - البقرة (1-141)', pages: '1-21' },
+            { juz: 2, surahs: 'البقرة (142-252)', pages: '22-41' },
+            { juz: 3, surahs: 'البقرة (253-286) - آل عمران (1-92)', pages: '42-61' },
+            { juz: 4, surahs: 'آل عمران (93-200) - النساء (1-23)', pages: '62-81' },
+            { juz: 5, surahs: 'النساء (24-147)', pages: '82-101' },
+            { juz: 6, surahs: 'النساء (148-176) - المائدة (1-81)', pages: '102-121' },
+            { juz: 7, surahs: 'المائدة (82-120) - الأنعام (1-110)', pages: '122-141' },
+            { juz: 8, surahs: 'الأنعام (111-165) - الأعراف (1-87)', pages: '142-161' },
+            { juz: 9, surahs: 'الأعراف (88-206) - الأنفال (1-40)', pages: '162-181' },
+            { juz: 10, surahs: 'الأنفال (41-75) - التوبة (1-92)', pages: '182-201' },
+            { juz: 11, surahs: 'التوبة (93-129) - هود (1-5)', pages: '202-221' },
+            { juz: 12, surahs: 'هود (6-123) - يوسف (1-52)', pages: '222-241' },
+            { juz: 13, surahs: 'يوسف (53-111) - إبراهيم (1-52)', pages: '242-261' },
+            { juz: 14, surahs: 'الحجر - النحل (1-128)', pages: '262-281' },
+            { juz: 15, surahs: 'الإسراء - الكهف (1-74)', pages: '282-301' },
+            { juz: 16, surahs: 'الكهف (75-110) - طه (1-135)', pages: '302-321' },
+            { juz: 17, surahs: 'الأنبياء - الحج (1-78)', pages: '322-341' },
+            { juz: 18, surahs: 'المؤمنون - الفرقان (1-20)', pages: '342-361' },
+            { juz: 19, surahs: 'الفرقان (21-77) - النمل (1-55)', pages: '362-381' },
+            { juz: 20, surahs: 'النمل (56-93) - العنكبوت (1-45)', pages: '382-401' },
+            { juz: 21, surahs: 'العنكبوت (46-69) - الأحزاب (1-30)', pages: '402-421' },
+            { juz: 22, surahs: 'الأحزاب (31-73) - يس (1-27)', pages: '422-441' },
+            { juz: 23, surahs: 'يس (28-83) - الزمر (1-31)', pages: '442-461' },
+            { juz: 24, surahs: 'الزمر (32-75) - فصلت (1-46)', pages: '462-481' },
+            { juz: 25, surahs: 'فصلت (47-54) - الجاثية (1-37)', pages: '482-501' },
+            { juz: 26, surahs: 'الأحقاف - الذاريات (1-30)', pages: '502-521' },
+            { juz: 27, surahs: 'الذاريات (31-60) - الحديد (1-29)', pages: '522-541' },
+            { juz: 28, surahs: 'المجادلة - التحريم', pages: '542-561' },
+            { juz: 29, surahs: 'الملك - المرسلات', pages: '562-581' },
+            { juz: 30, surahs: 'النبأ - الناس', pages: '582-604' }
+        ];
+
+        let progress = JSON.parse(localStorage.getItem('khatmah_progress') || '[]');
+
+        function init() {
+            renderDays();
+            updateStats();
+        }
+
+        function renderDays() {
+            document.getElementById('days-grid').innerHTML = juzData.map((d, i) => `
+                <div class="day-card ${progress.includes(i) ? 'completed' : ''}" onclick="toggleDay(${i})">
+                    <div class="day-number">اليوم ${i + 1}</div>
+                    <div class="juz-number">الجزء ${d.juz}</div>
+                    <div class="pages-info">صفحات: ${d.pages}</div>
+                    <div class="day-status">
+                        ${progress.includes(i) ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="far fa-circle" style="color:var(--text-muted)"></i>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleDay(index) {
+            if (progress.includes(index)) {
+                progress = progress.filter(i => i !== index);
+            } else {
+                progress.push(index);
+            }
+            localStorage.setItem('khatmah_progress', JSON.stringify(progress));
+            renderDays();
+            updateStats();
+        }
+
+        function updateStats() {
+            const completed = progress.length;
+            const remaining = 30 - completed;
+            const percent = Math.round((completed / 30) * 100);
+
+            document.getElementById('completed-count').textContent = completed;
+            document.getElementById('remaining-count').textContent = remaining;
+            document.getElementById('percent').textContent = percent + '%';
+            document.getElementById('main-progress').style.width = percent + '%';
+        }
+
+        function resetProgress() {
+            if (confirm('هل أنت متأكد من إعادة التعيين؟')) {
+                progress = [];
+                localStorage.setItem('khatmah_progress', '[]');
+                renderDays();
+                updateStats();
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

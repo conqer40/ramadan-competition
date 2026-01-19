@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رمضانك عندنا - قريباً</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #0f1629;
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --gold-light: #F4E285;
+            --text-white: #FFFFFF;
+            --text-muted: #94A3B8;
+            --border: rgba(212, 175, 55, 0.2);
+            --glass: rgba(255, 255, 255, 0.05);
+            --ramadan-purple: #4a1a7a;
+            --ramadan-blue: #1a3a7a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary), var(--ramadan-purple) 50%, var(--ramadan-blue));
+            background-attachment: fixed;
+            color: var(--text-white);
+            direction: rtl;
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Stars Animation */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(2px 2px at 40% 70%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(3px 3px at 50% 20%, rgba(255, 215, 0, 0.6), transparent),
+                radial-gradient(2px 2px at 60% 80%, rgba(255, 255, 255, 0.5), transparent),
+                radial-gradient(2px 2px at 80% 40%, rgba(255, 215, 0, 0.5), transparent),
+                radial-gradient(2px 2px at 10% 60%, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(3px 3px at 90% 10%, rgba(255, 215, 0, 0.4), transparent),
+                radial-gradient(2px 2px at 70% 50%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(2px 2px at 30% 90%, rgba(255, 215, 0, 0.5), transparent);
+            animation: twinkle 4s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Lanterns */
+        .lanterns {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            display: flex;
+            justify-content: space-around;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .lantern {
+            font-size: 50px;
+            animation: swing 3s ease-in-out infinite;
+            transform-origin: top center;
+            filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.5));
+        }
+
+        .lantern:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .lantern:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        .lantern:nth-child(4) {
+            animation-delay: 1.5s;
+        }
+
+        .lantern:nth-child(5) {
+            animation-delay: 2s;
+        }
+
+        .lantern:nth-child(6) {
+            animation-delay: 2.5s;
+        }
+
+        .lantern:nth-child(7) {
+            animation-delay: 3s;
+        }
+
+        @keyframes swing {
+
+            0%,
+            100% {
+                transform: rotate(-10deg);
+            }
+
+            50% {
+                transform: rotate(10deg);
+            }
+        }
+
+        /* Moon */
+        .moon {
+            position: fixed;
+            top: 80px;
+            left: 80px;
+            font-size: 100px;
+            animation: floatMoon 8s ease-in-out infinite;
+            z-index: -1;
+            filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
+        }
+
+        @keyframes floatMoon {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--gold);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--gold), 0 0 10px var(--gold);
+            }
+
+            to {
+                text-shadow: 0 0 15px var(--gold), 0 0 30px var(--gold), 0 0 45px var(--gold);
+            }
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            padding: 0.5rem 2rem;
+            border-radius: 30px;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.3);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        /* Countdown */
+        .countdown-section {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 26, 122, 0.2));
+            border-radius: 30px;
+            border: 2px solid var(--gold);
+            padding: 3rem;
+            margin: 3rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .countdown-section::before {
+            content: "✨🌙✨";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        .countdown-label {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 2rem;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .countdown-box:hover {
+            transform: translateY(-10px);
+        }
+
+        .countdown-number {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--gold);
+            display: block;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .countdown-unit {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            margin: 4rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: var(--gold);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--gold);
+            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.15);
+        }
+
+        .feature-emoji {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.3));
+        }
+
+        .feature-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--gold);
+        }
+
+        .feature-desc {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* Competition Info */
+        .competition-section {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(74, 26, 122, 0.15));
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            padding: 4rem;
+            margin: 4rem 0;
+        }
+
+        .competition-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .competition-content h2 {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .competition-content p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            line-height: 2;
+            margin-bottom: 2rem;
+        }
+
+        .prize-list {
+            list-style: none;
+        }
+
+        .prize-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .prize-list li:hover {
+            background: rgba(212, 175, 55, 0.1);
+            transform: translateX(-10px);
+        }
+
+        .prize-list i {
+            color: var(--gold);
+            font-size: 1.5rem;
+        }
+
+        .competition-visual {
+            text-align: center;
+        }
+
+        .trophy-icon {
+            font-size: 12rem;
+            color: var(--gold);
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Audio Control */
+        .audio-control {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: var(--glass);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--gold);
+            font-size: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .audio-control:hover {
+            transform: scale(1.1);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+        }
+
+        .footer-emoji {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .competition-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .countdown-timer {
+                gap: 1rem;
+            }
+
+            .countdown-box {
+                min-width: 80px;
+                padding: 1.5rem 1rem;
+            }
+
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .competition-section {
+                padding: 2rem;
+            }
+
+            .trophy-icon {
+                font-size: 6rem;
+            }
+
+            .lanterns {
+                height: 80px;
+            }
+
+            .lantern {
+                font-size: 30px;
+            }
+
+            .moon {
+                font-size: 60px;
+                top: 50px;
+                left: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Lanterns -->
+    <div class="lanterns">
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+    </div>
+
+    <!-- Moon -->
+    <div class="moon">🌙</div>
+
+    <!-- Audio Control -->
+    <div class="audio-control" id="audioControl" onclick="toggleAudio()">
+        <i class="fas fa-volume-mute"></i>
+    </div>
+    <audio id="bgAudio" loop src="audio/ramadan.mp3"></audio>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-moon logo-icon"></i>
+                <span class="logo-text">رمضانك عندنا</span>
+            </div>
+            <a href="/admin.html" class="admin-btn">
+                <i class="fas fa-lock"></i> دخول المدير
+            </a>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <span class="hero-badge">🌙 رمضان 1447 هـ 🌙</span>
+            <h1 class="hero-title">رمضانك عندنا</h1>
+            <p class="hero-subtitle">
+                استعد لأكبر مسابقة رمضانية تفاعلية! سؤال يومي، جوائز قيمة، وأجواء رمضانية مميزة
+            </p>
+        </section>
+
+        <!-- Countdown -->
+        <section class="countdown-section">
+            <h2 class="countdown-label">⏰ باقي على رمضان</h2>
+            <div class="countdown-timer">
+                <div class="countdown-box">
+                    <span class="countdown-number" id="days">--</span>
+                    <div class="countdown-unit">يوم</div>
+                </div>
+                <div class="countdown-box">
+                    <span class="countdown-number" id="hours">--</span>
+                    <div class="countdown-unit">ساعة</div>
+                </div>
+                <div class="countdown-box">
+                    <span class="countdown-number" id="minutes">--</span>
+                    <div class="countdown-unit">دقيقة</div>
+                </div>
+                <div class="countdown-box">
+                    <span class="countdown-number" id="seconds">--</span>
+                    <div class="countdown-unit">ثانية</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features-section">
+            <h2 class="section-title">✨ مميزات الموقع ✨</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-emoji">🏆</span>
+                    <h3 class="feature-name">مسابقة يومية</h3>
+                    <p class="feature-desc">سؤال جديد كل يوم من الفجر حتى المغرب مع عداد للوقت وتسجيل الإجابات</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">🎁</span>
+                    <h3 class="feature-name">جوائز قيمة</h3>
+                    <p class="feature-desc">جوائز مميزة للفائزين في نهاية الشهر الكريم</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">📊</span>
+                    <h3 class="feature-name">ترتيب المتسابقين</h3>
+                    <p class="feature-desc">تابع ترتيبك بين المتسابقين حسب النقاط وسرعة الإجابة</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">📅</span>
+                    <h3 class="feature-name">إمساكية رمضان</h3>
+                    <p class="feature-desc">مواعيد الصلوات اليومية لكامل شهر رمضان المبارك</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">🤲</span>
+                    <h3 class="feature-name">أذكار الصباح والمساء</h3>
+                    <p class="feature-desc">مجموعة من الأذكار اليومية لتبدأ وتنهي يومك بذكر الله</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">📻</span>
+                    <h3 class="feature-name">إذاعة القرآن</h3>
+                    <p class="feature-desc">بث مباشر لإذاعة القرآن الكريم من القاهرة</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">📺</span>
+                    <h3 class="feature-name">برامج رمضانية</h3>
+                    <p class="feature-desc">قوائم تشغيل لأفضل البرامج والمحاضرات الدينية</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-emoji">🔔</span>
+                    <h3 class="feature-name">إشعارات فورية</h3>
+                    <p class="feature-desc">تنبيهات مباشرة للمسابقة والنتائج والفائزين</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Competition Info -->
+        <section class="competition-section">
+            <div class="competition-grid">
+                <div class="competition-content">
+                    <h2>🏆 المسابقة الرمضانية الكبرى</h2>
+                    <p>
+                        شارك معنا في أكبر مسابقة رمضانية تفاعلية! سؤال جديد كل يوم من أذان الفجر حتى أذان المغرب.
+                        أجب بشكل صحيح وبأسرع وقت لتتصدر قائمة المتسابقين وتفوز بجوائز قيمة!
+                    </p>
+                    <ul class="prize-list">
+                        <li><i class="fas fa-check-circle"></i> سؤال يومي جديد طوال شهر رمضان</li>
+                        <li><i class="fas fa-check-circle"></i> تسجيل تلقائي للإجابات والوقت</li>
+                        <li><i class="fas fa-check-circle"></i> ترتيب فوري للمتسابقين</li>
+                        <li><i class="fas fa-check-circle"></i> عرض الإجابة الصحيحة بعد المغرب</li>
+                        <li><i class="fas fa-trophy"></i> جوائز قيمة للفائزين</li>
+                    </ul>
+                </div>
+                <div class="competition-visual">
+                    <i class="fas fa-trophy trophy-icon"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span class="footer-emoji">🌙✨🏮</span>
+            <p class="footer-text">رمضان كريم - نتمنى لكم شهراً مباركاً مليئاً بالخير والبركات</p>
+        </footer>
+    </div>
+
+    <script>
+        // Countdown Timer
+        const RAMADAN_START = new Date('2026-02-18T00:00:00');
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = RAMADAN_START - now;
+
+            if (diff <= 0) {
+                // Ramadan has started - redirect to main site
+                window.location.href = '/index.html';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(mins).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(secs).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Audio Control
+        let audioPlaying = false;
+        function toggleAudio() {
+            const audio = document.getElementById('bgAudio');
+            const control = document.getElementById('audioControl');
+
+            if (audioPlaying) {
+                audio.pause();
+                control.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+                audio.play().catch(() => { });
+                control.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
+            audioPlaying = !audioPlaying;
+        }
+    </script>
+
+</body>
+
+</html>

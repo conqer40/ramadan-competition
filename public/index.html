@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رمضانك عندنا - المسابقة الرمضانية</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <!-- Lanterns Decoration -->
+    <div class="lanterns">
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+        <span class="lantern">🏮</span>
+    </div>
+
+    <!-- Audio Control -->
+    <div class="audio-control" id="audioControl" onclick="toggleAudio()">
+        <i class="fas fa-volume-mute"></i>
+    </div>
+    <audio id="bgAudio" loop src="audio/ramadan.mp3"></audio>
+
+    <!-- Notifications -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showPage('home')">
+                <i class="fas fa-moon logo-icon"></i>
+                <span class="logo-text">رمضانك عندنا</span>
+            </a>
+
+            <nav>
+                <a href="#" class="nav-link active" onclick="showPage('home')">الرئيسية</a>
+                <a href="#" class="nav-link" onclick="showPage('competition')">المسابقة</a>
+                <a href="#" class="nav-link" onclick="showPage('leaderboard')">الترتيب</a>
+                <a href="#" class="nav-link" onclick="showPage('imsakia')">الإمساكية</a>
+                <a href="#" class="nav-link" onclick="showPage('adhkar')">الأذكار</a>
+                <a href="#" class="nav-link" onclick="showPage('radio')">الإذاعة</a>
+            </nav>
+
+            <div class="header-actions" id="auth-buttons">
+                <!-- Will be populated by JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Page -->
+        <div id="page-home" class="page-container active">
+            <!-- Countdown to Ramadan -->
+            <div class="countdown-hero" id="ramadan-countdown">
+                <h1 class="countdown-title">باقي على رمضان</h1>
+                <p class="countdown-subtitle">استعد لشهر الخير والبركات</p>
+                <div class="countdown-timer" id="ramadan-timer">
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="days">--</span>
+                        <div class="countdown-label">يوم</div>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="hours">--</span>
+                        <div class="countdown-label">ساعة</div>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="minutes">--</span>
+                        <div class="countdown-label">دقيقة</div>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="seconds">--</span>
+                        <div class="countdown-label">ثانية</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Status (shows after Ramadan starts) -->
+            <div id="ramadan-active" style="display:none;">
+                <section class="hero">
+                    <h1 class="hero-title">رمضان كريم 🌙</h1>
+                    <p class="hero-subtitle">شارك في المسابقة اليومية واربح جوائز قيمة</p>
+                </section>
+
+                <div class="info-row">
+                    <div class="info-card">
+                        <div class="info-label">التاريخ الهجري</div>
+                        <div class="info-value" id="hijri-date">1 رمضان 1447</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">التاريخ الميلادي</div>
+                        <div class="info-value" id="gregorian-date">18 فبراير 2026</div>
+                    </div>
+                </div>
+
+                <div class="main-cards">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-clock"></i></div>
+                            <h3 class="card-title">الصلاة القادمة</h3>
+                        </div>
+                        <div class="countdown-display" id="prayer-countdown">--:--:--</div>
+                        <div class="countdown-label" id="prayer-name" style="text-align:center;">الفجر</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-trophy"></i></div>
+                            <h3 class="card-title">حالة المسابقة</h3>
+                        </div>
+                        <div style="text-align:center;">
+                            <p id="competition-message">سؤال اليوم متاح الآن!</p>
+                            <div class="status-badge status-open" id="comp-status">
+                                <i class="fas fa-door-open"></i> المسابقة مفتوحة
+                            </div>
+                            <button class="btn btn-gold" style="margin-top:1.5rem;" onclick="showPage('competition')">
+                                شارك الآن <i class="fas fa-arrow-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Showcase -->
+            <section class="features-showcase">
+                <h2 class="features-title">✨ مميزات الموقع ✨</h2>
+                <div class="features-row">
+                    <div class="feature-box" onclick="showPage('competition')">
+                        <span class="feature-emoji">🏆</span>
+                        <h3 class="feature-name">مسابقة يومية</h3>
+                        <p class="feature-desc">سؤال يومي من الفجر للمغرب</p>
+                    </div>
+                    <div class="feature-box" onclick="showPage('leaderboard')">
+                        <span class="feature-emoji">📊</span>
+                        <h3 class="feature-name">ترتيب المتسابقين</h3>
+                        <p class="feature-desc">تابع ترتيبك بين المتسابقين</p>
+                    </div>
+                    <div class="feature-box" onclick="showPage('imsakia')">
+                        <span class="feature-emoji">📅</span>
+                        <h3 class="feature-name">إمساكية رمضان</h3>
+                        <p class="feature-desc">مواعيد الصلوات اليومية</p>
+                    </div>
+                    <div class="feature-box" onclick="showPage('adhkar')">
+                        <span class="feature-emoji">🤲</span>
+                        <h3 class="feature-name">الأذكار</h3>
+                        <p class="feature-desc">أذكار الصباح والمساء</p>
+                    </div>
+                </div>
+                <div class="features-row" style="margin-top:1rem;">
+                    <a href="/tasbih.html" class="feature-box">
+                        <span class="feature-emoji">📿</span>
+                        <h3 class="feature-name">السبحة الإلكترونية</h3>
+                        <p class="feature-desc">عداد التسبيح والأذكار</p>
+                    </a>
+                    <a href="/quran.html" class="feature-box">
+                        <span class="feature-emoji">📖</span>
+                        <h3 class="feature-name">القرآن الكريم</h3>
+                        <p class="feature-desc">اقرأ واستمع للقرآن</p>
+                    </a>
+                    <a href="/qibla.html" class="feature-box">
+                        <span class="feature-emoji">🧭</span>
+                        <h3 class="feature-name">اتجاه القبلة</h3>
+                        <p class="feature-desc">بوصلة القبلة بالـ GPS</p>
+                    </a>
+                    <a href="/duas.html" class="feature-box">
+                        <span class="feature-emoji">🤲</span>
+                        <h3 class="feature-name">أدعية رمضانية</h3>
+                        <p class="feature-desc">دعاء الإفطار والسحور</p>
+                    </a>
+                </div>
+                <div class="features-row" style="margin-top:1rem;">
+                    <a href="/khatmah.html" class="feature-box">
+                        <span class="feature-emoji">📅</span>
+                        <h3 class="feature-name">جدول الختمة</h3>
+                        <p class="feature-desc">اختم القرآن في رمضان</p>
+                    </a>
+                    <a href="/tracker.html" class="feature-box">
+                        <span class="feature-emoji">📊</span>
+                        <h3 class="feature-name">تتبع العبادات</h3>
+                        <p class="feature-desc">سجل يومي لعباداتك</p>
+                    </a>
+                    <a href="/challenges.html" class="feature-box">
+                        <span class="feature-emoji">🎯</span>
+                        <h3 class="feature-name">التحديات اليومية</h3>
+                        <p class="feature-desc">تحدى نفسك كل يوم</p>
+                    </a>
+                    <div class="feature-box" onclick="showPage('programs')">
+                        <span class="feature-emoji">🎬</span>
+                        <h3 class="feature-name">البرامج</h3>
+                        <p class="feature-desc">برامج دينية متنوعة</p>
+                    </div>
+                </div>
+                <div class="features-row" style="margin-top:1rem;">
+                    <div class="feature-box" onclick="showPage('radio')">
+                        <span class="feature-emoji">📻</span>
+                        <h3 class="feature-name">إذاعة القرآن</h3>
+                        <p class="feature-desc">بث مباشر من القاهرة</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Competition Page -->
+        <div id="page-competition" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">المسابقة اليومية</h2>
+            </div>
+
+            <div id="comp-login-required" class="quiz-container" style="text-align:center;">
+                <i class="fas fa-lock" style="font-size:4rem; color:var(--gold); margin-bottom:1.5rem;"></i>
+                <h3 style="margin-bottom:1rem;">يجب تسجيل الدخول للمشاركة</h3>
+                <button class="btn btn-gold" onclick="showModal('login')">تسجيل الدخول</button>
+            </div>
+
+            <div id="comp-question" class="quiz-container" style="display:none;">
+                <div class="quiz-header">
+                    <span class="day-badge">اليوم <span id="q-day">1</span></span>
+                    <span class="timer-badge"><i class="fas fa-stopwatch"></i> <span id="q-timer">60</span></span>
+                </div>
+                <div class="question-text" id="q-text"></div>
+                <div class="options-list" id="options-list"></div>
+                <button class="btn btn-gold" style="width:100%; margin-top:1.5rem;" id="submit-btn"
+                    onclick="submitAnswer()" disabled>
+                    إرسال الإجابة
+                </button>
+            </div>
+
+            <div id="comp-answered" class="quiz-container" style="display:none; text-align:center;">
+                <i class="fas fa-check-circle" style="font-size:4rem; color:#4ade80; margin-bottom:1.5rem;"></i>
+                <h3>تم تسجيل إجابتك بنجاح!</h3>
+                <p style="color:var(--text-muted);">انتظر النتيجة مع أذان المغرب</p>
+            </div>
+
+            <div id="comp-result" class="quiz-container" style="display:none;"></div>
+        </div>
+
+        <!-- Leaderboard Page -->
+        <div id="page-leaderboard" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">ترتيب المتسابقين</h2>
+            </div>
+            <div class="leaderboard-list" id="leaderboard-list"></div>
+        </div>
+
+        <!-- Imsakia Page -->
+        <div id="page-imsakia" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">إمساكية رمضان</h2>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>اليوم</th>
+                            <th>رمضان</th>
+                            <th>الميلادي</th>
+                            <th>الفجر</th>
+                            <th>الشروق</th>
+                            <th>الظهر</th>
+                            <th>العصر</th>
+                            <th>المغرب</th>
+                            <th>العشاء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="imsakia-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Adhkar Page -->
+        <div id="page-adhkar" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">الأذكار</h2>
+            </div>
+            <div class="adhkar-tabs">
+                <button class="adhkar-tab active" onclick="loadAdhkar('azkar_morning', this)">أذكار الصباح</button>
+                <button class="adhkar-tab" onclick="loadAdhkar('azkar_evening', this)">أذكار المساء</button>
+            </div>
+            <div id="adhkar-list"></div>
+        </div>
+
+        <!-- Programs Page -->
+        <div id="page-programs" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">البرامج الرمضانية</h2>
+            </div>
+            <div id="programs-list" class="programs-grid"></div>
+        </div>
+
+        <!-- Radio Page -->
+        <div id="page-radio" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">إذاعة القرآن الكريم</h2>
+            </div>
+            <div class="radio-container">
+                <div class="radio-icon"><i class="fas fa-mosque"></i></div>
+                <h3 class="radio-title">البث المباشر</h3>
+                <p class="radio-subtitle">إذاعة القرآن الكريم من القاهرة</p>
+                <audio controls src="https://stream.radiojar.com/8s5u5tpdtwzuv"></audio>
+            </div>
+        </div>
+
+        <!-- Admin Page -->
+        <div id="page-admin" class="page-container">
+            <div class="page-header">
+                <button class="back-btn" onclick="showPage('home')"><i class="fas fa-arrow-right"></i></button>
+                <h2 class="page-title">لوحة التحكم</h2>
+            </div>
+
+            <div class="admin-stats" id="admin-stats"></div>
+
+            <div class="card" style="margin-bottom:1.5rem; text-align:center;">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-cog"></i></div>
+                    <h3 class="card-title">الإدارة الشاملة</h3>
+                </div>
+                <p style="color:var(--text-muted); margin-bottom:1rem;">للتحكم الكامل في المستخدمين والأسئلة والمحتوى
+                </p>
+                <a href="/admin.html" class="btn btn-gold">
+                    <i class="fas fa-external-link-alt"></i> فتح لوحة التحكم
+                </a>
+            </div>
+
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-bullhorn"></i></div>
+                    <h3 class="card-title">إرسال إشعار سريع</h3>
+                </div>
+                <textarea id="admin-msg" class="form-input" rows="3" placeholder="اكتب رسالتك هنا..."
+                    style="resize:none;margin-bottom:1rem;"></textarea>
+                <select id="admin-msg-type" class="form-input" style="margin-bottom:1rem;">
+                    <option value="info">إشعار عام</option>
+                    <option value="warning">تنبيه هام</option>
+                    <option value="success">تهنئة</option>
+                </select>
+                <button class="btn btn-gold" onclick="sendAdminNotify()">إرسال للجميع</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2 class="modal-title">تسجيل الدخول</h2>
+                <div class="form-group">
+                    <input type="tel" id="login-phone" class="form-input" placeholder="رقم الهاتف">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="login-pass" class="form-input" placeholder="كلمة المرور">
+                </div>
+                <button class="btn btn-gold" style="width:100%;" onclick="doLogin()">دخول</button>
+                <div class="form-switch">
+                    ليس لديك حساب؟ <a onclick="toggleAuthForm()">سجل الآن</a>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" style="display:none;">
+                <h2 class="modal-title">حساب جديد</h2>
+                <div class="form-group">
+                    <input type="text" id="reg-name" class="form-input" placeholder="الاسم الكامل">
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="reg-phone" class="form-input" placeholder="رقم الهاتف">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="reg-id" class="form-input" placeholder="الرقم القومي">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="reg-pass" class="form-input" placeholder="كلمة المرور">
+                </div>
+                <label class="form-checkbox">
+                    <input type="checkbox" id="reg-terms"> أوافق على الشروط والأحكام
+                </label>
+                <button class="btn btn-gold" style="width:100%;" onclick="doRegister()">إنشاء حساب</button>
+                <div class="form-switch">
+                    لديك حساب؟ <a onclick="toggleAuthForm()">سجل دخول</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="text-align:center; padding:2rem; border-top:1px solid var(--border); margin-top:2rem;">
+        <p style="color:var(--text-muted);">تم تطوير الموقع بواسطة <a href="https://www.facebook.com/MohamedElhawy0"
+                target="_blank" style="color:var(--gold); text-decoration:none;">محمد الحاوي</a> 🌙</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

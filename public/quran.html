@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .quran-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .quran-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .quran-title {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .quran-subtitle {
+            color: var(--text-muted);
+        }
+
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .surah-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .surah-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .surah-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        .surah-number {
+            width: 40px;
+            height: 40px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .surah-info {
+            flex: 1;
+        }
+
+        .surah-name {
+            font-weight: 600;
+            color: var(--text-white);
+            font-size: 1.1rem;
+        }
+
+        .surah-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .reader-container {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .reader-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .reader-title {
+            font-size: 1.75rem;
+            color: var(--gold);
+        }
+
+        .reader-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .reader-content {
+            font-family: 'Amiri', 'Traditional Arabic', serif;
+            font-size: 1.75rem;
+            line-height: 2.5;
+            text-align: center;
+            color: var(--text-white);
+        }
+
+        .ayah {
+            display: inline;
+            margin: 0 0.25rem;
+        }
+
+        .ayah-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            font-size: 0.8rem;
+            color: var(--gold);
+            margin: 0 0.5rem;
+            vertical-align: middle;
+        }
+
+        .audio-player {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .audio-player audio {
+            max-width: 100%;
+        }
+
+        .juz-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .juz-tab {
+            padding: 0.5rem 1rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .juz-tab.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .quran-font {
+            font-family: 'Amiri Quran', 'Amiri', serif;
+        }
+
+        .bismillah {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="quran-container">
+        <div class="quran-header">
+            <h1 class="quran-title">📖 القرآن الكريم</h1>
+            <p class="quran-subtitle">اقرأ واستمع للقرآن الكريم</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" class="form-input search-input" placeholder="ابحث عن سورة..." id="search"
+                oninput="filterSurahs()">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <div class="juz-tabs" id="juz-tabs"></div>
+
+        <div class="reader-container" id="reader">
+            <div class="reader-header">
+                <h2 class="reader-title" id="reader-title">سورة الفاتحة</h2>
+                <button class="reader-close" onclick="closeReader()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="reader-content" id="reader-content"></div>
+            <div class="audio-player" id="audio-player"></div>
+        </div>
+
+        <div class="surah-grid" id="surah-grid"></div>
+    </div>
+
+    <script>
+        // Surah list with juz information
+        const surahs = [
+            { number: 1, name: 'الفاتحة', english: 'Al-Fatiha', verses: 7, type: 'مكية', juz: 1 },
+            { number: 2, name: 'البقرة', english: 'Al-Baqarah', verses: 286, type: 'مدنية', juz: 1 },
+            { number: 3, name: 'آل عمران', english: 'Aal-Imran', verses: 200, type: 'مدنية', juz: 3 },
+            { number: 4, name: 'النساء', english: 'An-Nisa', verses: 176, type: 'مدنية', juz: 4 },
+            { number: 5, name: 'المائدة', english: 'Al-Ma\'idah', verses: 120, type: 'مدنية', juz: 6 },
+            { number: 6, name: 'الأنعام', english: 'Al-An\'am', verses: 165, type: 'مكية', juz: 7 },
+            { number: 7, name: 'الأعراف', english: 'Al-A\'raf', verses: 206, type: 'مكية', juz: 8 },
+            { number: 8, name: 'الأنفال', english: 'Al-Anfal', verses: 75, type: 'مدنية', juz: 9 },
+            { number: 9, name: 'التوبة', english: 'At-Tawbah', verses: 129, type: 'مدنية', juz: 10 },
+            { number: 10, name: 'يونس', english: 'Yunus', verses: 109, type: 'مكية', juz: 11 },
+            { number: 11, name: 'هود', english: 'Hud', verses: 123, type: 'مكية', juz: 11 },
+            { number: 12, name: 'يوسف', english: 'Yusuf', verses: 111, type: 'مكية', juz: 12 },
+            { number: 13, name: 'الرعد', english: 'Ar-Ra\'d', verses: 43, type: 'مدنية', juz: 13 },
+            { number: 14, name: 'إبراهيم', english: 'Ibrahim', verses: 52, type: 'مكية', juz: 13 },
+            { number: 15, name: 'الحجر', english: 'Al-Hijr', verses: 99, type: 'مكية', juz: 14 },
+            { number: 16, name: 'النحل', english: 'An-Nahl', verses: 128, type: 'مكية', juz: 14 },
+            { number: 17, name: 'الإسراء', english: 'Al-Isra', verses: 111, type: 'مكية', juz: 15 },
+            { number: 18, name: 'الكهف', english: 'Al-Kahf', verses: 110, type: 'مكية', juz: 15 },
+            { number: 19, name: 'مريم', english: 'Maryam', verses: 98, type: 'مكية', juz: 16 },
+            { number: 20, name: 'طه', english: 'Ta-Ha', verses: 135, type: 'مكية', juz: 16 },
+            { number: 21, name: 'الأنبياء', english: 'Al-Anbiya', verses: 112, type: 'مكية', juz: 17 },
+            { number: 22, name: 'الحج', english: 'Al-Hajj', verses: 78, type: 'مدنية', juz: 17 },
+            { number: 23, name: 'المؤمنون', english: 'Al-Mu\'minun', verses: 118, type: 'مكية', juz: 18 },
+            { number: 24, name: 'النور', english: 'An-Nur', verses: 64, type: 'مدنية', juz: 18 },
+            { number: 25, name: 'الفرقان', english: 'Al-Furqan', verses: 77, type: 'مكية', juz: 18 },
+            { number: 26, name: 'الشعراء', english: 'Ash-Shu\'ara', verses: 227, type: 'مكية', juz: 19 },
+            { number: 27, name: 'النمل', english: 'An-Naml', verses: 93, type: 'مكية', juz: 19 },
+            { number: 28, name: 'القصص', english: 'Al-Qasas', verses: 88, type: 'مكية', juz: 20 },
+            { number: 29, name: 'العنكبوت', english: 'Al-Ankabut', verses: 69, type: 'مكية', juz: 20 },
+            { number: 30, name: 'الروم', english: 'Ar-Rum', verses: 60, type: 'مكية', juz: 21 },
+            { number: 31, name: 'لقمان', english: 'Luqman', verses: 34, type: 'مكية', juz: 21 },
+            { number: 32, name: 'السجدة', english: 'As-Sajdah', verses: 30, type: 'مكية', juz: 21 },
+            { number: 33, name: 'الأحزاب', english: 'Al-Ahzab', verses: 73, type: 'مدنية', juz: 21 },
+            { number: 34, name: 'سبأ', english: 'Saba', verses: 54, type: 'مكية', juz: 22 },
+            { number: 35, name: 'فاطر', english: 'Fatir', verses: 45, type: 'مكية', juz: 22 },
+            { number: 36, name: 'يس', english: 'Ya-Sin', verses: 83, type: 'مكية', juz: 22 },
+            { number: 37, name: 'الصافات', english: 'As-Saffat', verses: 182, type: 'مكية', juz: 23 },
+            { number: 38, name: 'ص', english: 'Sad', verses: 88, type: 'مكية', juz: 23 },
+            { number: 39, name: 'الزمر', english: 'Az-Zumar', verses: 75, type: 'مكية', juz: 23 },
+            { number: 40, name: 'غافر', english: 'Ghafir', verses: 85, type: 'مكية', juz: 24 },
+            { number: 41, name: 'فصلت', english: 'Fussilat', verses: 54, type: 'مكية', juz: 24 },
+            { number: 42, name: 'الشورى', english: 'Ash-Shura', verses: 53, type: 'مكية', juz: 25 },
+            { number: 43, name: 'الزخرف', english: 'Az-Zukhruf', verses: 89, type: 'مكية', juz: 25 },
+            { number: 44, name: 'الدخان', english: 'Ad-Dukhan', verses: 59, type: 'مكية', juz: 25 },
+            { number: 45, name: 'الجاثية', english: 'Al-Jathiyah', verses: 37, type: 'مكية', juz: 25 },
+            { number: 46, name: 'الأحقاف', english: 'Al-Ahqaf', verses: 35, type: 'مكية', juz: 26 },
+            { number: 47, name: 'محمد', english: 'Muhammad', verses: 38, type: 'مدنية', juz: 26 },
+            { number: 48, name: 'الفتح', english: 'Al-Fath', verses: 29, type: 'مدنية', juz: 26 },
+            { number: 49, name: 'الحجرات', english: 'Al-Hujurat', verses: 18, type: 'مدنية', juz: 26 },
+            { number: 50, name: 'ق', english: 'Qaf', verses: 45, type: 'مكية', juz: 26 },
+            { number: 51, name: 'الذاريات', english: 'Adh-Dhariyat', verses: 60, type: 'مكية', juz: 26 },
+            { number: 52, name: 'الطور', english: 'At-Tur', verses: 49, type: 'مكية', juz: 27 },
+            { number: 53, name: 'النجم', english: 'An-Najm', verses: 62, type: 'مكية', juz: 27 },
+            { number: 54, name: 'القمر', english: 'Al-Qamar', verses: 55, type: 'مكية', juz: 27 },
+            { number: 55, name: 'الرحمن', english: 'Ar-Rahman', verses: 78, type: 'مدنية', juz: 27 },
+            { number: 56, name: 'الواقعة', english: 'Al-Waqi\'ah', verses: 96, type: 'مكية', juz: 27 },
+            { number: 57, name: 'الحديد', english: 'Al-Hadid', verses: 29, type: 'مدنية', juz: 27 },
+            { number: 58, name: 'المجادلة', english: 'Al-Mujadilah', verses: 22, type: 'مدنية', juz: 28 },
+            { number: 59, name: 'الحشر', english: 'Al-Hashr', verses: 24, type: 'مدنية', juz: 28 },
+            { number: 60, name: 'الممتحنة', english: 'Al-Mumtahanah', verses: 13, type: 'مدنية', juz: 28 },
+            { number: 61, name: 'الصف', english: 'As-Saff', verses: 14, type: 'مدنية', juz: 28 },
+            { number: 62, name: 'الجمعة', english: 'Al-Jumu\'ah', verses: 11, type: 'مدنية', juz: 28 },
+            { number: 63, name: 'المنافقون', english: 'Al-Munafiqun', verses: 11, type: 'مدنية', juz: 28 },
+            { number: 64, name: 'التغابن', english: 'At-Taghabun', verses: 18, type: 'مدنية', juz: 28 },
+            { number: 65, name: 'الطلاق', english: 'At-Talaq', verses: 12, type: 'مدنية', juz: 28 },
+            { number: 66, name: 'التحريم', english: 'At-Tahrim', verses: 12, type: 'مدنية', juz: 28 },
+            { number: 67, name: 'الملك', english: 'Al-Mulk', verses: 30, type: 'مكية', juz: 29 },
+            { number: 68, name: 'القلم', english: 'Al-Qalam', verses: 52, type: 'مكية', juz: 29 },
+            { number: 69, name: 'الحاقة', english: 'Al-Haqqah', verses: 52, type: 'مكية', juz: 29 },
+            { number: 70, name: 'المعارج', english: 'Al-Ma\'arij', verses: 44, type: 'مكية', juz: 29 },
+            { number: 71, name: 'نوح', english: 'Nuh', verses: 28, type: 'مكية', juz: 29 },
+            { number: 72, name: 'الجن', english: 'Al-Jinn', verses: 28, type: 'مكية', juz: 29 },
+            { number: 73, name: 'المزمل', english: 'Al-Muzzammil', verses: 20, type: 'مكية', juz: 29 },
+            { number: 74, name: 'المدثر', english: 'Al-Muddathir', verses: 56, type: 'مكية', juz: 29 },
+            { number: 75, name: 'القيامة', english: 'Al-Qiyamah', verses: 40, type: 'مكية', juz: 29 },
+            { number: 76, name: 'الإنسان', english: 'Al-Insan', verses: 31, type: 'مدنية', juz: 29 },
+            { number: 77, name: 'المرسلات', english: 'Al-Mursalat', verses: 50, type: 'مكية', juz: 29 },
+            { number: 78, name: 'النبأ', english: 'An-Naba', verses: 40, type: 'مكية', juz: 30 },
+            { number: 79, name: 'النازعات', english: 'An-Nazi\'at', verses: 46, type: 'مكية', juz: 30 },
+            { number: 80, name: 'عبس', english: 'Abasa', verses: 42, type: 'مكية', juz: 30 },
+            { number: 81, name: 'التكوير', english: 'At-Takwir', verses: 29, type: 'مكية', juz: 30 },
+            { number: 82, name: 'الانفطار', english: 'Al-Infitar', verses: 19, type: 'مكية', juz: 30 },
+            { number: 83, name: 'المطففين', english: 'Al-Mutaffifin', verses: 36, type: 'مكية', juz: 30 },
+            { number: 84, name: 'الانشقاق', english: 'Al-Inshiqaq', verses: 25, type: 'مكية', juz: 30 },
+            { number: 85, name: 'البروج', english: 'Al-Buruj', verses: 22, type: 'مكية', juz: 30 },
+            { number: 86, name: 'الطارق', english: 'At-Tariq', verses: 17, type: 'مكية', juz: 30 },
+            { number: 87, name: 'الأعلى', english: 'Al-A\'la', verses: 19, type: 'مكية', juz: 30 },
+            { number: 88, name: 'الغاشية', english: 'Al-Ghashiyah', verses: 26, type: 'مكية', juz: 30 },
+            { number: 89, name: 'الفجر', english: 'Al-Fajr', verses: 30, type: 'مكية', juz: 30 },
+            { number: 90, name: 'البلد', english: 'Al-Balad', verses: 20, type: 'مكية', juz: 30 },
+            { number: 91, name: 'الشمس', english: 'Ash-Shams', verses: 15, type: 'مكية', juz: 30 },
+            { number: 92, name: 'الليل', english: 'Al-Layl', verses: 21, type: 'مكية', juz: 30 },
+            { number: 93, name: 'الضحى', english: 'Ad-Duha', verses: 11, type: 'مكية', juz: 30 },
+            { number: 94, name: 'الشرح', english: 'Ash-Sharh', verses: 8, type: 'مكية', juz: 30 },
+            { number: 95, name: 'التين', english: 'At-Tin', verses: 8, type: 'مكية', juz: 30 },
+            { number: 96, name: 'العلق', english: 'Al-Alaq', verses: 19, type: 'مكية', juz: 30 },
+            { number: 97, name: 'القدر', english: 'Al-Qadr', verses: 5, type: 'مكية', juz: 30 },
+            { number: 98, name: 'البينة', english: 'Al-Bayyinah', verses: 8, type: 'مدنية', juz: 30 },
+            { number: 99, name: 'الزلزلة', english: 'Az-Zalzalah', verses: 8, type: 'مدنية', juz: 30 },
+            { number: 100, name: 'العاديات', english: 'Al-Adiyat', verses: 11, type: 'مكية', juz: 30 },
+            { number: 101, name: 'القارعة', english: 'Al-Qari\'ah', verses: 11, type: 'مكية', juz: 30 },
+            { number: 102, name: 'التكاثر', english: 'At-Takathur', verses: 8, type: 'مكية', juz: 30 },
+            { number: 103, name: 'العصر', english: 'Al-Asr', verses: 3, type: 'مكية', juz: 30 },
+            { number: 104, name: 'الهمزة', english: 'Al-Humazah', verses: 9, type: 'مكية', juz: 30 },
+            { number: 105, name: 'الفيل', english: 'Al-Fil', verses: 5, type: 'مكية', juz: 30 },
+            { number: 106, name: 'قريش', english: 'Quraysh', verses: 4, type: 'مكية', juz: 30 },
+            { number: 107, name: 'الماعون', english: 'Al-Ma\'un', verses: 7, type: 'مكية', juz: 30 },
+            { number: 108, name: 'الكوثر', english: 'Al-Kawthar', verses: 3, type: 'مكية', juz: 30 },
+            { number: 109, name: 'الكافرون', english: 'Al-Kafirun', verses: 6, type: 'مكية', juz: 30 },
+            { number: 110, name: 'النصر', english: 'An-Nasr', verses: 3, type: 'مدنية', juz: 30 },
+            { number: 111, name: 'المسد', english: 'Al-Masad', verses: 5, type: 'مكية', juz: 30 },
+            { number: 112, name: 'الإخلاص', english: 'Al-Ikhlas', verses: 4, type: 'مكية', juz: 30 },
+            { number: 113, name: 'الفلق', english: 'Al-Falaq', verses: 5, type: 'مكية', juz: 30 },
+            { number: 114, name: 'الناس', english: 'An-Nas', verses: 6, type: 'مكية', juz: 30 }
+        ];
+
+        let currentJuz = 0; // 0 = all
+
+        function init() {
+            renderJuzTabs();
+            renderSurahs();
+        }
+
+        function renderJuzTabs() {
+            const tabsEl = document.getElementById('juz-tabs');
+            let html = '<button class="juz-tab active" onclick="filterByJuz(0)">الكل</button>';
+            for (let i = 1; i <= 30; i++) {
+                html += `<button class="juz-tab" onclick="filterByJuz(${i})">الجزء ${i}</button>`;
+            }
+            tabsEl.innerHTML = html;
+        }
+
+        function renderSurahs(filtered = null) {
+            const list = filtered || surahs;
+            document.getElementById('surah-grid').innerHTML = list.map(s => `
+                <div class="surah-card" onclick="openSurah(${s.number})">
+                    <div class="surah-number">${s.number}</div>
+                    <div class="surah-info">
+                        <div class="surah-name">سورة ${s.name}</div>
+                        <div class="surah-meta">${s.type} • ${s.verses} آية</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterByJuz(juz) {
+            currentJuz = juz;
+            document.querySelectorAll('.juz-tab').forEach((t, i) => t.classList.toggle('active', i === juz));
+
+            if (juz === 0) {
+                renderSurahs();
+            } else {
+                renderSurahs(surahs.filter(s => s.juz === juz));
+            }
+        }
+
+        function filterSurahs() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const filtered = surahs.filter(s =>
+                s.name.includes(query) || s.english.toLowerCase().includes(query) || s.number.toString() === query
+            );
+            renderSurahs(filtered);
+        }
+
+        async function openSurah(number) {
+            const surah = surahs.find(s => s.number === number);
+            document.getElementById('reader').style.display = 'block';
+            document.getElementById('reader-title').textContent = `سورة ${surah.name}`;
+            document.getElementById('reader-content').innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</div>';
+            document.getElementById('surah-grid').style.display = 'none';
+            document.getElementById('juz-tabs').style.display = 'none';
+            document.querySelector('.search-box').style.display = 'none';
+
+            try {
+                const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}`);
+                const data = await res.json();
+
+                let html = number !== 9 ? '<span class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>' : '';
+
+                data.data.ayahs.forEach(ayah => {
+                    // Remove bismillah from first ayah if it's there
+                    let text = ayah.text;
+                    if (ayah.numberInSurah === 1 && number !== 1 && number !== 9) {
+                        text = text.replace('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ', '');
+                    }
+                    html += `<span class="ayah">${text}</span><span class="ayah-number">${ayah.numberInSurah}</span>`;
+                });
+
+                document.getElementById('reader-content').innerHTML = html;
+
+                // Audio player
+                document.getElementById('audio-player').innerHTML = `
+                    <audio controls>
+                        <source src="https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${number}.mp3" type="audio/mpeg">
+                    </audio>
+                `;
+            } catch (e) {
+                document.getElementById('reader-content').innerHTML = '<div class="loading">حدث خطأ في تحميل السورة</div>';
+            }
+        }
+
+        function closeReader() {
+            document.getElementById('reader').style.display = 'none';
+            document.getElementById('surah-grid').style.display = 'grid';
+            document.getElementById('juz-tabs').style.display = 'flex';
+            document.querySelector('.search-box').style.display = 'block';
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

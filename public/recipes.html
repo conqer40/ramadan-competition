@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وصفات رمضانية - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .recipes-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .recipes-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .recipes-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .recipes-subtitle {
+            color: var(--text-muted);
+        }
+
+        .recipes-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .recipes-tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .recipes-tab.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .recipe-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .recipe-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+        }
+
+        .recipe-image {
+            height: 180px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(74, 26, 122, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+        }
+
+        .recipe-content {
+            padding: 1.5rem;
+        }
+
+        .recipe-category {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .recipe-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: 0.5rem;
+        }
+
+        .recipe-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .recipe-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .recipe-meta i {
+            color: var(--gold);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="recipes-container">
+        <div class="recipes-header">
+            <h1 class="recipes-title">🍽️ وصفات رمضانية</h1>
+            <p class="recipes-subtitle">أفكار شهية للإفطار والسحور</p>
+        </div>
+
+        <div class="recipes-tabs" id="tabs"></div>
+        <div class="recipes-grid" id="recipes-grid"></div>
+    </div>
+
+    <script>
+        const recipes = {
+            iftar: [
+                { name: 'شوربة العدس', desc: 'شوربة دافئة ومغذية مثالية للإفطار', emoji: '🥣', time: '30 دقيقة', difficulty: 'سهل' },
+                { name: 'سمبوسك باللحم', desc: 'سمبوسك مقرمشة محشوة باللحم المفروم والبهارات', emoji: '🥟', time: '45 دقيقة', difficulty: 'متوسط' },
+                { name: 'فتة الدجاج', desc: 'فتة لذيذة مع الدجاج والأرز والخبز المحمص', emoji: '🍗', time: '60 دقيقة', difficulty: 'متوسط' },
+                { name: 'كشري مصري', desc: 'طبق مصري تقليدي بالعدس والأرز والمكرونة', emoji: '🍚', time: '50 دقيقة', difficulty: 'متوسط' },
+                { name: 'ملوخية بالأرانب', desc: 'ملوخية خضراء طازجة مع لحم الأرانب', emoji: '🥬', time: '90 دقيقة', difficulty: 'صعب' },
+                { name: 'محشي ورق عنب', desc: 'ورق عنب محشو بالأرز واللحم المفروم', emoji: '🌿', time: '120 دقيقة', difficulty: 'صعب' }
+            ],
+            suhoor: [
+                { name: 'فول مدمس', desc: 'فول مدمس بالزيت والليمون والثوم', emoji: '🫘', time: '15 دقيقة', difficulty: 'سهل' },
+                { name: 'بيض بالطماطم', desc: 'بيض مقلي مع صلصة الطماطم الطازجة', emoji: '🍳', time: '10 دقيقة', difficulty: 'سهل' },
+                { name: 'لبنة بالزيت', desc: 'لبنة كريمية مع زيت الزيتون والنعناع', emoji: '🥛', time: '5 دقائق', difficulty: 'سهل' },
+                { name: 'شكشوكة', desc: 'بيض في صلصة الطماطم والفلفل الحار', emoji: '🍅', time: '20 دقيقة', difficulty: 'سهل' },
+                { name: 'حمص بالطحينة', desc: 'حمص كريمي مع الطحينة وزيت الزيتون', emoji: '🥙', time: '15 دقيقة', difficulty: 'سهل' }
+            ],
+            drinks: [
+                { name: 'قمر الدين', desc: 'عصير المشمش التقليدي المنعش', emoji: '🥤', time: '10 دقائق', difficulty: 'سهل' },
+                { name: 'تمر هندي', desc: 'مشروب تمر هندي بارد ومنعش', emoji: '🧃', time: '15 دقيقة', difficulty: 'سهل' },
+                { name: 'خروب', desc: 'عصير الخروب الطبيعي المغذي', emoji: '🥤', time: '10 دقائق', difficulty: 'سهل' },
+                { name: 'كركديه', desc: 'مشروب الكركديه البارد أو الساخن', emoji: '🍵', time: '15 دقيقة', difficulty: 'سهل' },
+                { name: 'سوبيا', desc: 'مشروب السوبيا الأبيض المنعش', emoji: '🥛', time: '20 دقيقة', difficulty: 'متوسط' }
+            ],
+            desserts: [
+                { name: 'كنافة بالقشطة', desc: 'كنافة ذهبية محشوة بالقشطة الطازجة', emoji: '🍰', time: '45 دقيقة', difficulty: 'متوسط' },
+                { name: 'قطايف بالمكسرات', desc: 'قطايف محشوة بالمكسرات والقرفة', emoji: '🥮', time: '30 دقيقة', difficulty: 'متوسط' },
+                { name: 'بسبوسة', desc: 'بسبوسة ناعمة بالسميد وجوز الهند', emoji: '🍮', time: '40 دقيقة', difficulty: 'سهل' },
+                { name: 'أم علي', desc: 'حلوى مصرية بالمكسرات والحليب الساخن', emoji: '🥧', time: '35 دقيقة', difficulty: 'سهل' },
+                { name: 'مهلبية', desc: 'مهلبية كريمية بماء الورد والفستق', emoji: '🍨', time: '25 دقيقة', difficulty: 'سهل' }
+            ]
+        };
+
+        const categories = {
+            iftar: '🌙 وجبات الإفطار',
+            suhoor: '🌅 وجبات السحور',
+            drinks: '🥤 المشروبات',
+            desserts: '🍰 الحلويات'
+        };
+
+        let currentCategory = 'iftar';
+
+        function init() {
+            renderTabs();
+            renderRecipes('iftar');
+        }
+
+        function renderTabs() {
+            document.getElementById('tabs').innerHTML = Object.entries(categories).map(([key, name]) => `
+                <button class="recipes-tab ${key === 'iftar' ? 'active' : ''}" onclick="selectCategory('${key}')">${name}</button>
+            `).join('');
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.recipes-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderRecipes(cat);
+        }
+
+        function renderRecipes(cat) {
+            document.getElementById('recipes-grid').innerHTML = recipes[cat].map(r => `
+                <div class="recipe-card">
+                    <div class="recipe-image">${r.emoji}</div>
+                    <div class="recipe-content">
+                        <span class="recipe-category">${categories[cat]}</span>
+                        <h3 class="recipe-name">${r.name}</h3>
+                        <p class="recipe-desc">${r.desc}</p>
+                        <div class="recipe-meta">
+                            <span><i class="fas fa-clock"></i> ${r.time}</span>
+                            <span><i class="fas fa-signal"></i> ${r.difficulty}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

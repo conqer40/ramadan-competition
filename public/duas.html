@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أدعية رمضانية - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .duas-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .duas-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .duas-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .duas-subtitle {
+            color: var(--text-muted);
+        }
+
+        .duas-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .duas-tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .duas-tab.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .dua-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .dua-card:hover {
+            border-color: var(--gold);
+        }
+
+        .dua-category {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .dua-title {
+            font-size: 1.25rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .dua-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.5rem;
+            line-height: 2.2;
+            color: var(--text-white);
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+
+        .dua-meaning {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+
+        .dua-source {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        .dua-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .dua-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dua-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="duas-container">
+        <div class="duas-header">
+            <h1 class="duas-title">🤲 أدعية رمضانية</h1>
+            <p class="duas-subtitle">أدعية مختارة لشهر رمضان المبارك</p>
+        </div>
+
+        <div class="duas-tabs" id="tabs"></div>
+        <div id="duas-list"></div>
+    </div>
+
+    <script>
+        const duas = {
+            iftar: [
+                {
+                    title: 'دعاء الإفطار',
+                    text: 'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ',
+                    meaning: 'ذهب العطش، وابتلت العروق، وثبت الأجر إن شاء الله',
+                    source: 'رواه أبو داود'
+                },
+                {
+                    title: 'دعاء قبل الإفطار',
+                    text: 'اللَّهُمَّ لَكَ صُمْتُ، وَعَلَى رِزْقِكَ أَفْطَرْتُ',
+                    meaning: 'اللهم لأجلك صمت، وعلى ما رزقتني أفطرت',
+                    source: 'رواه أبو داود'
+                },
+                {
+                    title: 'دعاء عند الإفطار',
+                    text: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ بِرَحْمَتِكَ الَّتِي وَسِعَتْ كُلَّ شَيْءٍ أَنْ تَغْفِرَ لِي',
+                    meaning: 'اللهم إني أسألك برحمتك الواسعة أن تغفر لي ذنوبي',
+                    source: 'رواه ابن ماجه'
+                }
+            ],
+            suhoor: [
+                {
+                    title: 'دعاء نية الصيام',
+                    text: 'نَوَيْتُ صَوْمَ غَدٍ مِنْ شَهْرِ رَمَضَانَ',
+                    meaning: 'نويت صيام الغد من شهر رمضان المبارك',
+                    source: 'من أدعية السحور'
+                },
+                {
+                    title: 'دعاء السحور',
+                    text: 'اللَّهُمَّ بَارِكْ لَنَا فِي السَّحُورِ',
+                    meaning: 'اللهم اجعل في سحورنا بركة',
+                    source: 'من أدعية السحور'
+                }
+            ],
+            laylat_qadr: [
+                {
+                    title: 'دعاء ليلة القدر',
+                    text: 'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي',
+                    meaning: 'اللهم إنك عفو كريم تحب العفو، فاعف عني ذنوبي',
+                    source: 'رواه الترمذي عن عائشة رضي الله عنها'
+                },
+                {
+                    title: 'دعاء التهجد',
+                    text: 'اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ نُورُ السَّمَاوَاتِ وَالأَرْضِ، وَلَكَ الْحَمْدُ أَنْتَ قَيِّمُ السَّمَاوَاتِ وَالأَرْضِ',
+                    meaning: 'اللهم لك الحمد أنت نور السماوات والأرض ومن فيهن',
+                    source: 'رواه البخاري ومسلم'
+                }
+            ],
+            general: [
+                {
+                    title: 'دعاء رؤية الهلال',
+                    text: 'اللَّهُمَّ أَهِلَّهُ عَلَيْنَا بِالْيُمْنِ وَالإِيمَانِ، وَالسَّلامَةِ وَالإِسْلامِ، رَبِّي وَرَبُّكَ اللَّهُ',
+                    meaning: 'اللهم اجعل هذا الشهر شهر خير وإيمان وسلامة',
+                    source: 'رواه الترمذي'
+                },
+                {
+                    title: 'دعاء دخول رمضان',
+                    text: 'اللَّهُمَّ بَلِّغْنَا رَمَضَانَ، اللَّهُمَّ بَارِكْ لَنَا فِي رَمَضَانَ',
+                    meaning: 'اللهم بلغنا شهر رمضان وبارك لنا فيه',
+                    source: 'من أدعية رمضان'
+                },
+                {
+                    title: 'دعاء ختم القرآن',
+                    text: 'اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ، وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً',
+                    meaning: 'اللهم ارحمني بالقرآن واجعله نورًا وهدى لي',
+                    source: 'من أدعية ختم القرآن'
+                },
+                {
+                    title: 'دعاء للوالدين',
+                    text: 'رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا',
+                    meaning: 'رب اغفر لي ولوالدي وارحمهما كما ربياني صغيرًا',
+                    source: 'القرآن الكريم - سورة الإسراء'
+                }
+            ],
+            forgiveness: [
+                {
+                    title: 'سيد الاستغفار',
+                    text: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ',
+                    meaning: 'أعظم صيغة للاستغفار، من قالها موقنًا بها غُفر له',
+                    source: 'رواه البخاري'
+                },
+                {
+                    title: 'دعاء الاستغفار',
+                    text: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+                    meaning: 'أستغفر الله العظيم وأتوب إليه من جميع ذنوبي',
+                    source: 'رواه أبو داود والترمذي'
+                }
+            ]
+        };
+
+        const categories = {
+            iftar: 'دعاء الإفطار',
+            suhoor: 'دعاء السحور',
+            laylat_qadr: 'ليلة القدر',
+            general: 'أدعية عامة',
+            forgiveness: 'الاستغفار'
+        };
+
+        let currentCategory = 'iftar';
+
+        function init() {
+            renderTabs();
+            renderDuas('iftar');
+        }
+
+        function renderTabs() {
+            document.getElementById('tabs').innerHTML = Object.entries(categories).map(([key, name]) => `
+                <button class="duas-tab ${key === 'iftar' ? 'active' : ''}" onclick="selectCategory('${key}')">${name}</button>
+            `).join('');
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.duas-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderDuas(cat);
+        }
+
+        function renderDuas(cat) {
+            const list = duas[cat];
+            document.getElementById('duas-list').innerHTML = list.map(d => `
+                <div class="dua-card">
+                    <span class="dua-category">${categories[cat]}</span>
+                    <h3 class="dua-title">${d.title}</h3>
+                    <div class="dua-text">${d.text}</div>
+                    <div class="dua-meaning">📝 ${d.meaning}</div>
+                    <div class="dua-source">📚 ${d.source}</div>
+                    <div class="dua-actions">
+                        <button class="dua-btn" onclick="copyDua('${d.text}')"><i class="fas fa-copy"></i> نسخ</button>
+                        <button class="dua-btn" onclick="shareDua('${d.title}', '${d.text}')"><i class="fas fa-share"></i> مشاركة</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copyDua(text) {
+            navigator.clipboard.writeText(text);
+            alert('تم نسخ الدعاء! ✅');
+        }
+
+        function shareDua(title, text) {
+            if (navigator.share) {
+                navigator.share({ title, text });
+            } else {
+                copyDua(text);
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

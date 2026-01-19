@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>السبحة الإلكترونية - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .tasbih-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .tasbih-header {
+            margin-bottom: 2rem;
+        }
+
+        .tasbih-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .tasbih-subtitle {
+            color: var(--text-muted);
+        }
+
+        .tasbih-counter {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 26, 122, 0.2));
+            border: 3px solid var(--gold);
+            border-radius: 50%;
+            width: 250px;
+            height: 250px;
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
+        }
+
+        .tasbih-counter:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.5);
+        }
+
+        .tasbih-counter:active {
+            transform: scale(0.98);
+        }
+
+        .count-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--gold);
+            line-height: 1;
+        }
+
+        .count-label {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .tasbih-dhikr {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dhikr-text {
+            font-size: 1.75rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .dhikr-meaning {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .tasbih-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .tasbih-tab {
+            padding: 0.75rem 1.25rem;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tasbih-tab.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .tasbih-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .control-btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-reset {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .btn-reset:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .target-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 12px;
+            color: #4ade80;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), #4ade80);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .total-stats {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .stat-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .stat-item .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 0 30px rgba(212, 175, 55, 0);
+            }
+        }
+
+        .tasbih-counter.clicked {
+            animation: pulse-ring 0.5s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="tasbih-container">
+        <div class="tasbih-header">
+            <h1 class="tasbih-title">📿 السبحة الإلكترونية</h1>
+            <p class="tasbih-subtitle">اضغط على الدائرة للتسبيح</p>
+        </div>
+
+        <div class="tasbih-tabs" id="dhikr-tabs"></div>
+
+        <div class="tasbih-dhikr">
+            <div class="dhikr-text" id="current-dhikr">سُبْحَانَ اللَّهِ</div>
+            <div class="dhikr-meaning" id="dhikr-meaning">Glory be to Allah</div>
+        </div>
+
+        <div class="tasbih-counter" id="counter" onclick="incrementCount()">
+            <span class="count-number" id="count">0</span>
+            <span class="count-label">مرة</span>
+        </div>
+
+        <div class="target-info">
+            <div>الهدف: <span id="target">33</span> مرة</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="tasbih-controls">
+            <button class="control-btn btn-reset" onclick="resetCount()">
+                <i class="fas fa-redo"></i> إعادة
+            </button>
+        </div>
+
+        <div class="total-stats">
+            <div class="stat-item">
+                <div class="value" id="total-subhan">0</div>
+                <div class="label">سبحان الله</div>
+            </div>
+            <div class="stat-item">
+                <div class="value" id="total-hamd">0</div>
+                <div class="label">الحمد لله</div>
+            </div>
+            <div class="stat-item">
+                <div class="value" id="total-takbir">0</div>
+                <div class="label">الله أكبر</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const adhkar = [
+            { text: 'سُبْحَانَ اللَّهِ', meaning: 'Glory be to Allah', target: 33, key: 'subhan' },
+            { text: 'الْحَمْدُ لِلَّهِ', meaning: 'All praise is due to Allah', target: 33, key: 'hamd' },
+            { text: 'اللَّهُ أَكْبَرُ', meaning: 'Allah is the Greatest', target: 34, key: 'takbir' },
+            { text: 'لَا إِلَٰهَ إِلَّا اللَّهُ', meaning: 'There is no god but Allah', target: 100, key: 'tahlil' },
+            { text: 'أَسْتَغْفِرُ اللَّهَ', meaning: 'I seek forgiveness from Allah', target: 100, key: 'istighfar' },
+            { text: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ', meaning: 'There is no power except with Allah', target: 100, key: 'hawqala' },
+            { text: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ', meaning: 'Glory and praise be to Allah', target: 100, key: 'subhanbihamdi' },
+            { text: 'صَلِّ عَلَى النَّبِيِّ ﷺ', meaning: 'Send blessings upon the Prophet', target: 100, key: 'salawat' }
+        ];
+
+        let currentDhikr = 0;
+        let count = 0;
+        let totals = JSON.parse(localStorage.getItem('tasbih_totals') || '{}');
+
+        function init() {
+            renderTabs();
+            loadDhikr(0);
+            updateTotalStats();
+        }
+
+        function renderTabs() {
+            const tabsEl = document.getElementById('dhikr-tabs');
+            tabsEl.innerHTML = adhkar.map((d, i) => `
+                <button class="tasbih-tab ${i === 0 ? 'active' : ''}" onclick="loadDhikr(${i})">${d.text.split(' ')[0]}</button>
+            `).join('');
+        }
+
+        function loadDhikr(index) {
+            currentDhikr = index;
+            const dhikr = adhkar[index];
+            document.getElementById('current-dhikr').textContent = dhikr.text;
+            document.getElementById('dhikr-meaning').textContent = dhikr.meaning;
+            document.getElementById('target').textContent = dhikr.target;
+            count = 0;
+            updateDisplay();
+
+            document.querySelectorAll('.tasbih-tab').forEach((t, i) => {
+                t.classList.toggle('active', i === index);
+            });
+        }
+
+        function incrementCount() {
+            count++;
+            const dhikr = adhkar[currentDhikr];
+
+            // Add to totals
+            totals[dhikr.key] = (totals[dhikr.key] || 0) + 1;
+            localStorage.setItem('tasbih_totals', JSON.stringify(totals));
+
+            // Visual feedback
+            const counter = document.getElementById('counter');
+            counter.classList.add('clicked');
+            setTimeout(() => counter.classList.remove('clicked'), 500);
+
+            // Check if target reached
+            if (count === dhikr.target) {
+                // Auto move to next dhikr
+                setTimeout(() => {
+                    if (currentDhikr < adhkar.length - 1) {
+                        loadDhikr(currentDhikr + 1);
+                    } else {
+                        alert('🎉 ماشاء الله! أتممت جميع الأذكار');
+                    }
+                }, 500);
+            }
+
+            updateDisplay();
+            updateTotalStats();
+
+            // Vibration on mobile
+            if (navigator.vibrate) navigator.vibrate(30);
+        }
+
+        function updateDisplay() {
+            const dhikr = adhkar[currentDhikr];
+            document.getElementById('count').textContent = count;
+            const progress = Math.min((count / dhikr.target) * 100, 100);
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function resetCount() {
+            count = 0;
+            updateDisplay();
+        }
+
+        function updateTotalStats() {
+            document.getElementById('total-subhan').textContent = totals.subhan || 0;
+            document.getElementById('total-hamd').textContent = totals.hamd || 0;
+            document.getElementById('total-takbir').textContent = totals.takbir || 0;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تتبع العبادات - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .tracker-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tracker-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .tracker-title {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .tracker-subtitle {
+            color: var(--text-muted);
+        }
+
+        .date-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .date-nav button {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text-white);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .date-nav button:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .current-date {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .day-progress {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 26, 122, 0.2));
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .progress-circle {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 10;
+        }
+
+        .progress-circle .bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-circle .fill {
+            stroke: var(--gold);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .worship-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .worship-item {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .worship-item:hover {
+            border-color: var(--gold);
+        }
+
+        .worship-item.completed {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #4ade80;
+        }
+
+        .worship-icon {
+            font-size: 2rem;
+            width: 50px;
+            text-align: center;
+        }
+
+        .worship-info {
+            flex: 1;
+        }
+
+        .worship-name {
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: 0.25rem;
+        }
+
+        .worship-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .worship-check {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: all 0.3s;
+        }
+
+        .worship-item.completed .worship-check {
+            background: #4ade80;
+            border-color: #4ade80;
+            color: white;
+        }
+
+        .streak-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .streak {
+            text-align: center;
+        }
+
+        .streak-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .streak-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn"><i class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="tracker-container">
+        <div class="tracker-header">
+            <h1 class="tracker-title">📊 تتبع العبادات</h1>
+            <p class="tracker-subtitle">سجل يومي لعباداتك في رمضان</p>
+        </div>
+
+        <div class="date-nav">
+            <button onclick="changeDate(-1)"><i class="fas fa-chevron-right"></i></button>
+            <span class="current-date" id="current-date"></span>
+            <button onclick="changeDate(1)"><i class="fas fa-chevron-left"></i></button>
+        </div>
+
+        <div class="day-progress">
+            <div class="progress-circle">
+                <svg width="150" height="150">
+                    <circle class="bg" cx="75" cy="75" r="65"></circle>
+                    <circle class="fill" id="progress-ring" cx="75" cy="75" r="65" stroke-dasharray="408"
+                        stroke-dashoffset="408"></circle>
+                </svg>
+                <div class="progress-text" id="progress-text">0%</div>
+            </div>
+            <div style="color:var(--text-muted);">نسبة إنجاز اليوم</div>
+            <div class="streak-info">
+                <div class="streak">
+                    <div class="streak-value" id="current-streak">0</div>
+                    <div class="streak-label">أيام متتالية</div>
+                </div>
+                <div class="streak">
+                    <div class="streak-value" id="total-days">0</div>
+                    <div class="streak-label">إجمالي الأيام</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="worship-grid" id="worship-grid"></div>
+    </div>
+
+    <script>
+        const worships = [
+            { id: 'fasting', name: 'الصيام', desc: 'صيام يوم كامل', icon: '🌙' },
+            { id: 'fajr', name: 'صلاة الفجر', desc: 'في وقتها جماعة', icon: '🌅' },
+            { id: 'dhuhr', name: 'صلاة الظهر', desc: 'في وقتها', icon: '☀️' },
+            { id: 'asr', name: 'صلاة العصر', desc: 'في وقتها', icon: '🌤️' },
+            { id: 'maghrib', name: 'صلاة المغرب', desc: 'في وقتها', icon: '🌅' },
+            { id: 'isha', name: 'صلاة العشاء', desc: 'في وقتها', icon: '🌙' },
+            { id: 'taraweeh', name: 'صلاة التراويح', desc: '8 أو 20 ركعة', icon: '🕌' },
+            { id: 'quran', name: 'قراءة القرآن', desc: 'جزء أو أكثر', icon: '📖' },
+            { id: 'tasbih', name: 'الأذكار', desc: 'أذكار الصباح والمساء', icon: '📿' },
+            { id: 'sadaqah', name: 'الصدقة', desc: 'تصدقت اليوم', icon: '💝' },
+            { id: 'dua', name: 'الدعاء', desc: 'دعاء قبل الإفطار', icon: '🤲' },
+            { id: 'tahajjud', name: 'قيام الليل', desc: 'صلاة في الثلث الأخير', icon: '✨' }
+        ];
+
+        let currentDate = new Date();
+        let allData = JSON.parse(localStorage.getItem('worship_tracker') || '{}');
+
+        function init() {
+            updateDateDisplay();
+            renderWorships();
+            updateProgress();
+            updateStreaks();
+        }
+
+        function getDateKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function updateDateDisplay() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = currentDate.toLocaleDateString('ar-EG', options);
+        }
+
+        function changeDate(delta) {
+            currentDate.setDate(currentDate.getDate() + delta);
+            updateDateDisplay();
+            renderWorships();
+            updateProgress();
+        }
+
+        function getTodayData() {
+            const key = getDateKey(currentDate);
+            return allData[key] || [];
+        }
+
+        function saveTodayData(completed) {
+            const key = getDateKey(currentDate);
+            allData[key] = completed;
+            localStorage.setItem('worship_tracker', JSON.stringify(allData));
+        }
+
+        function renderWorships() {
+            const completed = getTodayData();
+            document.getElementById('worship-grid').innerHTML = worships.map(w => `
+                <div class="worship-item ${completed.includes(w.id) ? 'completed' : ''}" onclick="toggleWorship('${w.id}')">
+                    <div class="worship-icon">${w.icon}</div>
+                    <div class="worship-info">
+                        <div class="worship-name">${w.name}</div>
+                        <div class="worship-desc">${w.desc}</div>
+                    </div>
+                    <div class="worship-check"><i class="fas fa-check"></i></div>
+                </div>
+            `).join('');
+        }
+
+        function toggleWorship(id) {
+            let completed = getTodayData();
+            if (completed.includes(id)) {
+                completed = completed.filter(i => i !== id);
+            } else {
+                completed.push(id);
+            }
+            saveTodayData(completed);
+            renderWorships();
+            updateProgress();
+            updateStreaks();
+        }
+
+        function updateProgress() {
+            const completed = getTodayData();
+            const percent = Math.round((completed.length / worships.length) * 100);
+            const offset = 408 - (408 * percent / 100);
+
+            document.getElementById('progress-ring').style.strokeDashoffset = offset;
+            document.getElementById('progress-text').textContent = percent + '%';
+        }
+
+        function updateStreaks() {
+            let streak = 0;
+            let total = 0;
+            const today = new Date();
+
+            // Count total days with activity
+            total = Object.keys(allData).filter(k => allData[k].length > 0).length;
+
+            // Count current streak
+            let checkDate = new Date(today);
+            while (true) {
+                const key = getDateKey(checkDate);
+                if (allData[key] && allData[key].length >= 5) { // At least 5 tasks
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            document.getElementById('current-streak').textContent = streak;
+            document.getElementById('total-days').textContent = total;
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
