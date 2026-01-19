@@ -306,17 +306,35 @@
             `).join('');
         }
 
-        function toggleWorship(id) {
+        async function toggleWorship(id) {
             let completed = getTodayData();
             if (completed.includes(id)) {
                 completed = completed.filter(i => i !== id);
             } else {
                 completed.push(id);
+                await checkSmartChallenge(id);
             }
             saveTodayData(completed);
             renderWorships();
             updateProgress();
             updateStreaks();
+        }
+
+        async function checkSmartChallenge(typeId) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+
+            try {
+                const res = await fetch('/api/smart-completion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, type: 'worship', value: typeId })
+                });
+                const data = await res.json();
+                if (data.success && data.new) {
+                    alert(`🎉 مبارك! أكملت تحدي "${data.name}" وكسبت ${data.points} نقطة!`);
+                }
+            } catch (e) { console.error(e); }
         }
 
         function updateProgress() {

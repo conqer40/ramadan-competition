@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - رمضانك عندنا</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .profile-pic-wrapper {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1rem;
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--gold);
+            object-fit: cover;
+            background: var(--glass);
+        }
+
+        .edit-pic-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--gold);
+            color: #000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #000;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: var(--glass);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            min-width: 100px;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .profile-form {
+            background: var(--glass);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .form-section-title {
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .pic-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pic-option {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            overflow: hidden;
+        }
+
+        .pic-option.selected {
+            border-color: var(--gold);
+        }
+
+        .pic-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #pic-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #pic-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a0b2e;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid var(--gold);
+        }
+
+        .fb-btn {
+            background: #1877f2;
+            color: white;
+            border: none;
+            margin-top: 1rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .fb-btn:hover {
+            background: #155dbd;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="btn btn-outline back-btn" style="position:fixed; top:20px; right:20px; z-index:100;"><i
+            class="fas fa-arrow-right"></i> الرئيسية</a>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-pic-wrapper">
+                <img src="" alt="Profile" class="profile-pic" id="display-pic">
+                <div class="edit-pic-btn" onclick="openPicModal()" id="edit-pic-btn"><i class="fas fa-camera"></i></div>
+            </div>
+            <h1 class="profile-name" id="display-name">...</h1>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-rank">-</div>
+                    <div class="stat-label">الترتيب</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-score">-</div>
+                    <div class="stat-label">نقاط</div>
+                </div>
+            </div>
+
+            <a href="#" target="_blank" id="fb-link-btn" class="btn fb-btn"
+                style="display:none; max-width:200px; margin:0 auto 1rem;">
+                <i class="fab fa-facebook"></i> فيسبوك
+            </a>
+        </div>
+
+        <div class="profile-form" id="edit-form" style="display:none;">
+            <h3 class="form-section-title">✨ تعديل البيانات</h3>
+
+            <div class="form-group">
+                <label>الاسم</label>
+                <input type="text" id="edit-name" class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label>رابط الفيسبوك</label>
+                <input type="url" id="edit-fb" class="form-input" placeholder="https://facebook.com/...">
+            </div>
+
+            <div class="form-group">
+                <label>تغيير كلمة المرور (اختياري)</label>
+                <input type="password" id="current-pass" class="form-input" placeholder="كلمة المرور الحالية">
+                <input type="password" id="new-pass" class="form-input" placeholder="كلمة المرور الجديدة"
+                    style="margin-top:0.5rem;">
+            </div>
+
+            <button class="btn btn-gold" onclick="saveProfile()" style="width:100%;">حفظ التغييرات</button>
+        </div>
+    </div>
+
+    <!-- Pic Selection Modal -->
+    <div id="pic-modal">
+        <div class="modal-content">
+            <h3>اختر صورة رمزية</h3>
+            <div class="pic-options" id="pic-options">
+                <!-- Generated by JS -->
+            </div>
+            <button class="btn btn-outline" onclick="closePicModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <script>
+        const API = '/api';
+        let currentUser = JSON.parse(localStorage.getItem('user'));
+        let profileUserId = null;
+        let isOwnProfile = false;
+
+        // Common avatars
+        const avatars = [
+            'https://cdn-icons-png.flaticon.com/512/4140/4140048.png',
+            'https://cdn-icons-png.flaticon.com/512/4140/4140047.png',
+            'https://cdn-icons-png.flaticon.com/512/4140/4140037.png',
+            'https://cdn-icons-png.flaticon.com/512/4140/4140051.png',
+            'https://cdn-icons-png.flaticon.com/512/145/145867.png',
+            'https://cdn-icons-png.flaticon.com/512/145/145852.png',
+            'https://cdn-icons-png.flaticon.com/512/11499/11499252.png',
+            'https://cdn-icons-png.flaticon.com/512/11499/11499187.png'
+        ];
+
+        let selectedAvatar = avatars[0];
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        async function init() {
+            const paramId = getQueryParam('id');
+            if (paramId) {
+                profileUserId = parseInt(paramId);
+            } else if (currentUser) {
+                profileUserId = currentUser.id;
+            } else {
+                window.location.href = '/';
+                return;
+            }
+
+            isOwnProfile = currentUser && (currentUser.id === profileUserId);
+
+            if (!isOwnProfile) {
+                document.getElementById('edit-pic-btn').style.display = 'none';
+                document.getElementById('edit-form').style.display = 'none';
+            } else {
+                document.getElementById('edit-form').style.display = 'block';
+            }
+
+            await loadProfile();
+            renderAvatars();
+        }
+
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API}/profile/${profileUserId}`);
+                if (!res.ok) {
+                    alert('المستخدم غير موجود');
+                    window.location.href = '/';
+                    return;
+                }
+                const data = await res.json();
+
+                document.getElementById('display-name').textContent = data.name;
+                document.getElementById('stat-rank').textContent = '#' + data.rank;
+                document.getElementById('stat-score').textContent = data.score;
+
+                const pic = data.profile_picture || avatars[0];
+                document.getElementById('display-pic').src = pic;
+                selectedAvatar = pic;
+
+                if (data.facebook_url) {
+                    const btn = document.getElementById('fb-link-btn');
+                    btn.href = data.facebook_url;
+                    btn.style.display = 'flex';
+                }
+
+                if (isOwnProfile) {
+                    document.getElementById('edit-name').value = data.name;
+                    document.getElementById('edit-fb').value = data.facebook_url || '';
+                }
+
+            } catch (e) { console.error(e); }
+        }
+
+        function renderAvatars() {
+            const container = document.getElementById('pic-options');
+            container.innerHTML = avatars.map(url => `
+                <div class="pic-option" onclick="selectAvatar('${url}', this)">
+                    <img src="${url}">
+                </div>
+            `).join('');
+        }
+
+        function openPicModal() {
+            document.getElementById('pic-modal').classList.add('active');
+        }
+
+        function closePicModal() {
+            document.getElementById('pic-modal').classList.remove('active');
+        }
+
+        function selectAvatar(url, el) {
+            selectedAvatar = url;
+            document.getElementById('display-pic').src = url;
+            document.querySelectorAll('.pic-option').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+            closePicModal();
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('edit-name').value;
+            const facebook_url = document.getElementById('edit-fb').value;
+            const current_password = document.getElementById('current-pass').value;
+            const new_password = document.getElementById('new-pass').value;
+
+            if (!name) return showToast('الاسم مطلوب', 'warning');
+
+            const payload = {
+                userId: currentUser.id,
+                name,
+                facebook_url,
+                profile_picture: selectedAvatar,
+                current_password
+            };
+
+            if (new_password) {
+                if (!current_password) return showToast('ادخل كلمة المرور الحالية لتغييرها', 'warning');
+                payload.password = new_password;
+            }
+
+            try {
+                const res = await fetch(`${API}/profile`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showToast('تم حفظ التعديلات! 🎉', 'success');
+                    // Update local storage name if changed
+                    currentUser.name = name;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+
+                    if (new_password) {
+                        document.getElementById('current-pass').value = '';
+                        document.getElementById('new-pass').value = '';
+                    }
+
+                    // Reload to reflect changes
+                    await loadProfile();
+
+                } else {
+                    showToast(data.error || 'حدث خطأ', 'warning');
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icons = { info: 'fa-bell', warning: 'fa-exclamation-triangle', success: 'fa-trophy' };
+            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

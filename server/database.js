@@ -49,6 +49,7 @@ function initDb() {
             password_hash TEXT NOT NULL,
             agreed_terms BOOLEAN DEFAULT 0,
             facebook_url TEXT,
+            profile_picture TEXT,
             role TEXT DEFAULT 'user',
             score INTEGER DEFAULT 0,
             total_time_ms INTEGER DEFAULT 0,

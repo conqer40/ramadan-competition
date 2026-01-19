@@ -141,6 +141,27 @@ function getCompetitionStatus(callback) {
             maghrib: row.maghrib,
             date: row.gregorian_date
         });
+        // Load challenges data
+        const challengesData = require('./data/challenges');
+
+        // Get current day of Ramadan (1-30) based on start date
+        function getCurrentRamadanDay() {
+            // For production usage relative to a fixed start date
+            const ramadanStart = new Date('2026-02-18T00:00:00');
+            const now = new Date();
+            // Reset hours for day diff calculation
+            const start = new Date(ramadanStart); start.setHours(0, 0, 0, 0);
+            const today = new Date(now); today.setHours(0, 0, 0, 0);
+
+            const diff = today - start;
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1; // +1 because day 0 is day 1
+
+            if (days < 1) return 1; // Default to 1 if not started
+            if (days > 30) return 30; // Cap at 30
+            return days;
+        }
+
+        // ... existing helpers ...
     });
 }
 
@@ -194,13 +215,44 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// Profile
+// Profile Get
 app.get('/api/profile/:userId', (req, res) => {
-    db.get(`SELECT id, name, phone, score, total_time_ms, 
+    db.get(`SELECT id, name, phone, score, total_time_ms, facebook_url, profile_picture,
             (SELECT COUNT(*)+1 FROM users u2 WHERE u2.score > users.score) as rank
             FROM users WHERE id = ?`, [req.params.userId], (err, user) => {
         if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
         res.json(user);
+    });
+});
+
+// Profile Update
+app.put('/api/profile', (req, res) => {
+    const { userId, name, facebook_url, profile_picture, password, current_password } = req.body;
+
+    // Verify user exists and password if changing it
+    db.get(`SELECT password_hash FROM users WHERE id = ?`, [userId], (err, user) => {
+        if (!user) return res.status(404).json({ error: 'المستخدم غير موجود' });
+
+        let query = `UPDATE users SET name = ?, facebook_url = ?, profile_picture = ?`;
+        let params = [name, facebook_url, profile_picture];
+
+        if (password) {
+            if (bcrypt.compareSync(current_password, user.password_hash)) {
+                const hash = bcrypt.hashSync(password, 10);
+                query += `, password_hash = ?`;
+                params.push(hash);
+            } else {
+                return res.status(401).json({ error: 'كلمة المرور الحالية غير صحيحة' });
+            }
+        }
+
+        query += ` WHERE id = ?`;
+        params.push(userId);
+
+        db.run(query, params, (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true });
+        });
     });
 });
 
@@ -747,6 +799,61 @@ app.get('/api/admin/results', (req, res) => {
 
 // ==================== CHALLENGES ROUTES ====================
 
+// ==================== CHALLENGES ROUTES ====================
+
+// Get all challenges
+app.get('/api/challenges', (req, res) => {
+    res.json(challengesData);
+});
+
+// Smart completion check
+app.post('/api/smart-completion', (req, res) => {
+    const { userId, type, value, count } = req.body;
+    const day = getCurrentRamadanDay();
+    // Find challenge for today
+    const challenge = challengesData.find(c => c.day === day);
+
+    if (!challenge) return res.json({ success: false, reason: 'No challenge for today' });
+
+    let matched = false;
+
+    // Check condition
+    if (challenge.type === type) {
+        if (type === 'khatmah') {
+            // value is juz number
+            if (parseInt(value) == parseInt(challenge.target)) matched = true;
+            if (challenge.target === 'finish' && value === 30) matched = true; // Simple logic
+        }
+        else if (type === 'worship') {
+            // value is worship id (e.g. 'taraweeh', 'fajr')
+            if (value === challenge.target) matched = true;
+        }
+        else if (type === 'tasbih') {
+            // value is tasbih key, count is amount done
+            if (value === challenge.target) {
+                if (!challenge.count || (count >= challenge.count)) matched = true;
+            }
+        }
+    }
+
+    if (matched) {
+        // Mark as complete using existing logic
+        db.run(`INSERT INTO user_challenges (user_id, day_number, points) VALUES (?, ?, ?)`,
+            [userId, day, challenge.points],
+            function (err) {
+                if (err) {
+                    // Already completed
+                    return res.json({ success: true, completed: true, new: false });
+                }
+                // Update score
+                db.run(`UPDATE users SET score = score + ? WHERE id = ?`, [challenge.points, userId]);
+                res.json({ success: true, completed: true, new: true, points: challenge.points, name: challenge.name });
+            });
+    } else {
+        res.json({ success: false, reason: 'Condition not met' });
+    }
+});
+
 // Get my challenges status
 app.get('/api/challenges/my-status/:userId', (req, res) => {
     db.all(`SELECT day_number FROM user_challenges WHERE user_id = ?`, [req.params.userId], (err, rows) => {
@@ -755,7 +862,7 @@ app.get('/api/challenges/my-status/:userId', (req, res) => {
     });
 });
 
-// Complete challenge
+// Manual Complete challenge (still kept for manual ones)
 app.post('/api/challenges/complete', (req, res) => {
     const { userId, dayNumber, points } = req.body;
 
@@ -777,7 +884,7 @@ app.post('/api/challenges/complete', (req, res) => {
 
 // Challenges Leaderboard
 app.get('/api/challenges/leaderboard', (req, res) => {
-    db.all(`SELECT u.name, SUM(uc.points) as total_points, COUNT(uc.day_number) as completed_count
+    db.all(`SELECT u.name, u.facebook_url, SUM(uc.points) as total_points, COUNT(uc.day_number) as completed_count
             FROM user_challenges uc
             JOIN users u ON uc.user_id = u.id
             GROUP BY uc.user_id

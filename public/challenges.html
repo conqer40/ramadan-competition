@@ -199,59 +199,36 @@
             window.location.href = '/';
         }
 
-        const challenges = [
-            { day: 1, name: 'قراءة الجزء الأول', desc: 'اقرأ الجزء الأول من القرآن', emoji: '📖', points: 100 },
-            { day: 2, name: 'صلاة التراويح كاملة', desc: 'صلِّ التراويح كاملة في المسجد', emoji: '🕌', points: 150 },
-            { day: 3, name: 'إطعام صائم', desc: 'قدم وجبة إفطار لصائم', emoji: '🍽️', points: 200 },
-            { day: 4, name: 'صلة الرحم', desc: 'تواصل مع أقاربك اليوم', emoji: '👨‍👩‍👧‍👦', points: 100 },
-            { day: 5, name: 'الاستغفار 1000 مرة', desc: 'أكثر من الاستغفار اليوم', emoji: '🤲', points: 150 },
-            { day: 6, name: 'الصدقة', desc: 'تصدق بمبلغ ولو بسيط', emoji: '💝', points: 200 },
-            { day: 7, name: 'حفظ 5 آيات', desc: 'احفظ 5 آيات جديدة', emoji: '📚', points: 250 },
-            { day: 8, name: 'صلاة الضحى', desc: 'صلِّ صلاة الضحى', emoji: '☀️', points: 100 },
-            { day: 9, name: 'قيام الليل', desc: 'صلِّ في الثلث الأخير من الليل', emoji: '🌙', points: 200 },
-            { day: 10, name: 'ختم جزء عم', desc: 'اختم الجزء 30 كاملاً', emoji: '✨', points: 300 },
-            { day: 11, name: 'الدعاء للوالدين', desc: 'ادعُ لوالديك 100 مرة', emoji: '❤️', points: 100 },
-            { day: 12, name: 'مساعدة محتاج', desc: 'ساعد شخصاً محتاجاً اليوم', emoji: '🤝', points: 200 },
-            { day: 13, name: 'الصلاة على النبي 1000', desc: 'صلِّ على النبي 1000 مرة', emoji: '💚', points: 150 },
-            { day: 14, name: 'قراءة سورة الكهف', desc: 'اقرأ سورة الكهف كاملة', emoji: '📖', points: 150 },
-            { day: 15, name: 'نصف رمضان!', desc: 'راجع أهدافك وجدد نيتك', emoji: '🎯', points: 100 },
-            { day: 16, name: 'التسبيح 100 مرة', desc: 'سبحان الله وبحمده 100 مرة', emoji: '📿', points: 100 },
-            { day: 17, name: 'إفطار جماعي', desc: 'أفطر مع عائلتك أو أصدقائك', emoji: '👨‍👩‍👧‍👦', points: 150 },
-            { day: 18, name: 'قراءة أذكار كاملة', desc: 'أذكار الصباح والمساء', emoji: '📿', points: 100 },
-            { day: 19, name: 'الاعتكاف ساعة', desc: 'اعتكف في المسجد ساعة', emoji: '🕌', points: 200 },
-            { day: 20, name: 'دخول العشر الأواخر', desc: 'نوِّ الاجتهاد في العشر', emoji: '🌟', points: 150 },
-            { day: 21, name: 'ليلة وتر', desc: 'أحيِ الليلة الأولى من الوتر', emoji: '✨', points: 300 },
-            { day: 22, name: 'قيام الليل كاملاً', desc: 'صلِّ قيام الليل كاملاً', emoji: '🌙', points: 300 },
-            { day: 23, name: 'ليلة وتر', desc: 'أحيِ الليلة الثالثة من الوتر', emoji: '✨', points: 300 },
-            { day: 24, name: 'الدعاء ساعة كاملة', desc: 'ادعُ الله ساعة متواصلة', emoji: '🤲', points: 250 },
-            { day: 25, name: 'ليلة وتر', desc: 'أحيِ الليلة الخامسة من الوتر', emoji: '✨', points: 300 },
-            { day: 26, name: 'زكاة الفطر', desc: 'أخرج زكاة الفطر', emoji: '💰', points: 200 },
-            { day: 27, name: 'ليلة القدر', desc: 'أحيِ ليلة السابع والعشرين', emoji: '🌟', points: 500 },
-            { day: 28, name: 'ختم القرآن', desc: 'اختم القرآن مرة على الأقل', emoji: '📖', points: 400 },
-            { day: 29, name: 'ليلة وتر', desc: 'أحيِ الليلة التاسعة من الوتر', emoji: '✨', points: 300 },
-            { day: 30, name: 'وداع رمضان', desc: 'ودع رمضان بالدعاء والشكر', emoji: '🤲', points: 200 }
-        ];
+        let challenges = []; // Will be loaded from API
 
         let completedChallenges = [];
 
         function getDayOfRamadan() {
-            // For demo/dev purposes, calculate days from Feb 18 2026
             const ramadanStart = new Date('2026-02-18');
             const now = new Date();
             const diff = now - ramadanStart;
-            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-            // Just clamp it for safety
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1; // +1 because day 0 is day 1
             if (days < 1) return 1;
             if (days > 30) return 30;
             return days;
         }
 
         async function init() {
+            await loadChallenges();
             await loadMyStatus();
             await loadLeaderboard();
             renderTodayChallenge();
             renderAllChallenges();
             updateStats();
+        }
+
+        async function loadChallenges() {
+            try {
+                const res = await fetch(`${API}/challenges`);
+                challenges = await res.json();
+            } catch (e) {
+                console.error('Error loading challenges:', e);
+            }
         }
 
         async function loadMyStatus() {
@@ -354,9 +331,7 @@
                                     <div class="challenge-item" style="padding:0.75rem;">
                                         <div class="challenge-day" style="font-size:1.2rem; width:35px; height:35px;">${i + 1}</div>
                                         <div class="challenge-info">
-                                            ${u.facebook_url
-                        ? `<a href="${u.facebook_url}" target="_blank" class="challenge-name" style="color:var(--gold); text-decoration:underline;">${u.name}</a>`
-                        : `<div class="challenge-name">${u.name}</div>`}
+                                            <a href="profile.html?id=${u.id}" class="challenge-name" style="color:var(--gold); text-decoration:underline;">${u.name}</a>
                                         </div>
                                         <div style="font-weight:bold; color:var(--gold);">${u.total_points}</div>
                                     </div>

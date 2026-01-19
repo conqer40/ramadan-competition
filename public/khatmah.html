@@ -237,15 +237,34 @@
             `).join('');
         }
 
-        function toggleDay(index) {
+        async function toggleDay(index) {
             if (progress.includes(index)) {
                 progress = progress.filter(i => i !== index);
             } else {
                 progress.push(index);
+                // Smart Link: Check for challenges
+                await checkSmartChallenge(index + 1); // index is 0-based, value is 1-based part
             }
             localStorage.setItem('khatmah_progress', JSON.stringify(progress));
             renderDays();
             updateStats();
+        }
+
+        async function checkSmartChallenge(juz) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+
+            try {
+                const res = await fetch('/api/smart-completion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, type: 'khatmah', value: juz })
+                });
+                const data = await res.json();
+                if (data.success && data.new) {
+                    alert(`🎉 مبارك! أكملت تحدي "${data.name}" وكسبت ${data.points} نقطة!`);
+                }
+            } catch (e) { console.error(e); }
         }
 
         function updateStats() {

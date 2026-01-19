@@ -319,6 +319,9 @@
 
             // Check if target reached
             if (count === dhikr.target) {
+                // Smart Link: Check for challenges
+                checkSmartChallenge(dhikr.key, count);
+
                 // Auto move to next dhikr
                 setTimeout(() => {
                     if (currentDhikr < adhkar.length - 1) {
@@ -334,6 +337,23 @@
 
             // Vibration on mobile
             if (navigator.vibrate) navigator.vibrate(30);
+        }
+
+        async function checkSmartChallenge(key, count) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) return;
+
+            try {
+                const res = await fetch('/api/smart-completion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id, type: 'tasbih', value: key, count })
+                });
+                const data = await res.json();
+                if (data.success && data.new) {
+                    alert(`🎉 مبارك! أكملت تحدي "${data.name}" وكسبت ${data.points} نقطة!`);
+                }
+            } catch (e) { console.error(e); }
         }
 
         function updateDisplay() {
