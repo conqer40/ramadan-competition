@@ -8,45 +8,68 @@ function seedDatabase(db) {
 }
 
 function seedImsakia(db) {
-    // Check if Imsakia exists
-    db.get('SELECT COUNT(*) as count FROM prayers_schedule', (err, row) => {
-        if (row && row.count > 0) return; // Already populated
+    console.log('Checking Imsakia data...');
 
-        console.log('Seeding Imsakia...');
-        const imsakiaPath = path.join(__dirname, 'data', 'imsakia.json');
-        if (!fs.existsSync(imsakiaPath)) return;
+    db.get(`SELECT id FROM seasons WHERE is_active = 1`, [], (err, season) => {
+        if (!season) {
+            console.log('No active season found for Imsakia seeding.');
+            return;
+        }
 
-        const imsakiaData = JSON.parse(fs.readFileSync(imsakiaPath, 'utf8'));
+        // Check if Imsakia exists FOR THIS SEASON
+        db.get('SELECT COUNT(*) as count FROM prayers_schedule WHERE season_id = ?', [season.id], (err, row) => {
+            if (row && row.count > 0) {
+                console.log(`Imsakia already exists for season ${season.id} (${row.count} records).`);
+                return;
+            }
 
-        db.get(`SELECT id FROM seasons WHERE is_active = 1`, [], (err, season) => {
-            if (!season) return;
+            console.log(`Seeding Imsakia for season ${season.id}...`);
+            const imsakiaPath = path.join(__dirname, 'data', 'imsakia.json');
+            if (!fs.existsSync(imsakiaPath)) {
+                console.error('Imsakia JSON file missing!');
+                return;
+            }
 
-            const stmt = db.prepare(`INSERT INTO prayers_schedule 
-                (season_id, day_number, day_name, gregorian_date, fajr, sunrise, dhuhr, asr, maghrib, isha) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+            try {
+                const imsakiaData = JSON.parse(fs.readFileSync(imsakiaPath, 'utf8'));
 
-            const months = {
-                'يناير': '01', 'فبراير': '02', 'مارس': '03', 'أبريل': '04',
-                'مايو': '05', 'يونيو': '06', 'يوليو': '07', 'أغسطس': '08',
-                'سبتمبر': '09', 'أكتوبر': '10', 'نوفمبر': '11', 'ديسمبر': '12'
-            };
+                const stmt = db.prepare(`INSERT INTO prayers_schedule 
+                    (season_id, day_number, day_name, gregorian_date, fajr, sunrise, dhuhr, asr, maghrib, isha) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
-            imsakiaData.forEach(day => {
-                let dateStr = day.gregorian_date;
-                const match = dateStr.match(/(\d+)\s+([^\s،0-9]+)(?:،)?\s*(\d+)/);
-                let formattedDate = dateStr;
-                if (match) {
-                    const d = match[1].padStart(2, '0');
-                    const m = months[match[2].trim()] || '01';
-                    const y = match[3];
-                    formattedDate = `${y}-${m}-${d}`;
-                }
+                const months = {
+                    'يناير': '01', 'فبراير': '02', 'مارس': '03', 'أبريل': '04',
+                    'مايو': '05', 'يونيو': '06', 'يوليو': '07', 'أغسطس': '08',
+                    'سبتمبر': '09', 'أكتوبر': '10', 'نوفمبر': '11', 'ديسمبر': '12'
+                };
 
-                stmt.run(season.id, day.ramadan_date, day.day_name, formattedDate,
-                    day.fajr, day.sunrise, day.dhuhr, day.asr, day.maghrib, day.isha);
-            });
+                db.serialize(() => {
+                    db.run("BEGIN TRANSACTION");
 
-            stmt.finalize(() => console.log('Imsakia seeded.'));
+                    imsakiaData.forEach(day => {
+                        let dateStr = day.gregorian_date;
+                        // Try to parse standard logic
+                        const match = dateStr.match(/(\d+)\s+([^\s،0-9]+)(?:،)?\s*(\d+)/);
+                        let formattedDate = dateStr;
+                        if (match) {
+                            const d = match[1].padStart(2, '0');
+                            const m = months[match[2].trim()] || '01';
+                            const y = match[3];
+                            formattedDate = `${y}-${m}-${d}`;
+                        }
+
+                        stmt.run(season.id, day.ramadan_date, day.day_name, formattedDate,
+                            day.fajr, day.sunrise, day.dhuhr, day.asr, day.maghrib, day.isha);
+                    });
+
+                    db.run("COMMIT", () => {
+                        console.log('Imsakia seeded successfully.');
+                        stmt.finalize();
+                    });
+                });
+            } catch (e) {
+                console.error('Error seeding Imsakia:', e);
+            }
         });
     });
 }

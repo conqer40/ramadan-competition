@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLeaderboard();
     loadAdhkar('azkar_morning');
     startRamadanCountdown();
+    loadChampion();
+    initAudio();
 });
 
 // Socket Notifications
@@ -37,6 +39,31 @@ function showToast(message, type = 'info') {
 
 // ==================== AUDIO CONTROL ====================
 let audioPlaying = false;
+
+function initAudio() {
+    const audio = document.getElementById('bgAudio');
+    const control = document.getElementById('audioControl');
+
+    // Try to play immediately
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+        playPromise.then(_ => {
+            // Autoplay started!
+            audioPlaying = true;
+            control.innerHTML = '<i class="fas fa-volume-up"></i>';
+            control.classList.add('playing');
+        }).catch(error => {
+            // Auto-play was prevented
+            // Show a toast or just wait for user interaction
+            console.log("Autoplay prevented:", error);
+            document.body.addEventListener('click', () => {
+                if (!audioPlaying) toggleAudio();
+            }, { once: true });
+        });
+    }
+}
+
 function toggleAudio() {
     const audio = document.getElementById('bgAudio');
     const control = document.getElementById('audioControl');
@@ -46,11 +73,42 @@ function toggleAudio() {
         control.innerHTML = '<i class="fas fa-volume-mute"></i>';
         control.classList.remove('playing');
     } else {
-        audio.play().catch(() => { });
+        audio.play().catch(e => console.log("Play failed:", e));
         control.innerHTML = '<i class="fas fa-volume-up"></i>';
         control.classList.add('playing');
     }
     audioPlaying = !audioPlaying;
+}
+
+// ==================== CHAMPION SHIELD ====================
+async function loadChampion() {
+    try {
+        const res = await fetch(`${API}/yesterday-winner`);
+        const data = await res.json();
+
+        if (data.available && data.winner) {
+            const container = document.getElementById('daily-champion');
+            const pic = document.getElementById('champion-pic');
+            const name = document.getElementById('champion-name');
+            const day = document.getElementById('champion-day');
+
+            pic.src = data.winner.profile_picture || 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png';
+            name.textContent = data.winner.name;
+            day.textContent = data.day;
+
+            // Add click to view profile
+            /* 
+            // Optional: If we had the user ID in the response (which we do if we select u.id in SQL)
+            // But currently I didn't select ID in the SQL in index.js, let me check...
+            // START CHECK: index.js SQL query was: SELECT u.name, u.profile_picture... NO ID.
+            // I should update SQL in index.js if I want a link. For now just visual.
+            */
+
+            container.style.display = 'block';
+        }
+    } catch (e) {
+        console.error("Error loading champion:", e);
+    }
 }
 
 // ==================== RAMADAN COUNTDOWN ====================
@@ -196,6 +254,11 @@ async function loadImsakia() {
         const data = await res.json();
 
         const tbody = document.getElementById('imsakia-tbody');
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">لا توجد بيانات للإمساكية حالياً</td></tr>';
+            return;
+        }
+
         tbody.innerHTML = data.map(d => `
             <tr class="${d.day_number === 1 ? 'today' : ''}">
                 <td>${d.day_name}</td>
@@ -211,6 +274,7 @@ async function loadImsakia() {
         `).join('');
     } catch (e) {
         console.error('Error loading imsakia:', e);
+        document.getElementById('imsakia-tbody').innerHTML = '<tr><td colspan="9" style="text-align:center; color:red;">خطأ في تحميل البيانات</td></tr>';
     }
 }
 

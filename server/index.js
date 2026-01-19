@@ -429,6 +429,16 @@ app.post('/api/admin/upload-imsakia', (req, res) => {
     res.json({ success: true, count: data.length });
 });
 
+// Force Seed (For troubleshooting)
+app.get('/api/admin/force-seed', (req, res) => {
+    try {
+        require('../load_data').seedDatabase(db);
+        res.json({ success: true, message: 'Seeding triggered. Check server logs.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Add/Update Question
 app.post('/api/admin/question', (req, res) => {
     const { season_id, day_number, question_text, option1, option2, option3, option4, option5, correct_answer, timer_seconds, status } = req.body;
@@ -471,6 +481,35 @@ app.get('/api/admin/stats', (req, res) => {
             (SELECT COUNT(*) FROM playlists) as total_playlists
         `, [], (err, stats) => {
         res.json(stats || {});
+    });
+});
+
+// Yesterday's Champion
+app.get('/api/yesterday-winner', (req, res) => {
+    const today = getCurrentRamadanDay();
+    const yesterday = today - 1;
+
+    if (yesterday < 1) return res.json({ available: false });
+
+    db.get(`SELECT id FROM seasons WHERE is_active = 1`, [], (err, season) => {
+        if (!season) return res.json({ available: false });
+
+        // Find question for yesterday
+        db.get(`SELECT id FROM questions WHERE season_id = ? AND day_number = ?`,
+            [season.id, yesterday], (err, question) => {
+                if (!question) return res.json({ available: false });
+
+                // Find fastest correct answer
+                db.get(`SELECT u.name, u.profile_picture, u.facebook_url, a.time_taken_ms 
+                    FROM answers a 
+                    JOIN users u ON a.user_id = u.id
+                    WHERE a.question_id = ? AND a.is_correct = 1
+                    ORDER BY a.time_taken_ms ASC LIMIT 1`,
+                    [question.id], (err, winner) => {
+                        if (!winner) return res.json({ available: false });
+                        res.json({ available: true, winner, day: yesterday });
+                    });
+            });
     });
 });
 

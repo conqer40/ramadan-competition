@@ -319,7 +319,7 @@
 
         async function loadLeaderboard() {
             try {
-                const res = await fetch(`${API}/challenges/leaderboard`);
+                const res = await fetch(`${API}/leaderboard`);
                 const data = await res.json();
 
                 const html = `
@@ -331,9 +331,13 @@
                                     <div class="challenge-item" style="padding:0.75rem;">
                                         <div class="challenge-day" style="font-size:1.2rem; width:35px; height:35px;">${i + 1}</div>
                                         <div class="challenge-info">
-                                            <a href="profile.html?id=${u.id}" class="challenge-name" style="color:var(--gold); text-decoration:underline;">${u.name}</a>
+                                            <a href="${u.facebook_url ? u.facebook_url : 'profile.html?id=' + u.id}" 
+                                               target="${u.facebook_url ? '_blank' : '_self'}"
+                                               class="challenge-name" style="color:var(--gold); text-decoration:underline;">
+                                                ${u.name} ${u.facebook_url ? '<i class="fab fa-facebook-f" style="font-size:0.8em; margin-right:5px;"></i>' : ''}
+                                            </a>
                                         </div>
-                                        <div style="font-weight:bold; color:var(--gold);">${u.total_points}</div>
+                                        <div style="font-weight:bold; color:var(--gold);">${u.score}</div>
                                     </div>
                                 `).join('')}
                             </div>

@@ -199,6 +199,22 @@ function initDb() {
         } catch (e) {
             console.error('Failed to seed database:', e);
         }
+
+        // Migration: Add facebook_url if not exists
+        db.all("PRAGMA table_info(users)", (err, columns) => {
+            if (err) {
+                console.error("Error checking table info:", err);
+                return;
+            }
+            const hasFacebookUrl = columns.some(col => col.name === 'facebook_url');
+            if (!hasFacebookUrl) {
+                console.log("Migrating database: Adding facebook_url column...");
+                db.run("ALTER TABLE users ADD COLUMN facebook_url TEXT", (err) => {
+                    if (err) console.error("Error adding facebook_url column:", err);
+                    else console.log("Migration successful: facebook_url added.");
+                });
+            }
+        });
     });
 }
 
