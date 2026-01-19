@@ -192,21 +192,12 @@ function initDb() {
             }
         });
 
-        // Seed sample Azkar
-        db.get("SELECT id FROM content WHERE type = 'azkar_morning' LIMIT 1", [], (err, row) => {
-            if (!row) {
-                const azkar = [
-                    { type: 'azkar_morning', title: 'أذكار الصباح', body: 'أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.' },
-                    { type: 'azkar_evening', title: 'أذكار المساء', body: 'أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.' },
-                    { type: 'good_deed', title: 'إطعام الطعام', body: 'قال رسول الله ﷺ: أطعموا الطعام وأفشوا السلام وصلوا بالليل والناس نيام تدخلوا الجنة بسلام.' },
-                    { type: 'good_deed', title: 'صلة الرحم', body: 'قال رسول الله ﷺ: من أحب أن يبسط له في رزقه وينسأ له في أثره فليصل رحمه.' }
-                ];
-                azkar.forEach(a => {
-                    db.run(`INSERT INTO content (type, title, body) VALUES (?, ?, ?)`, [a.type, a.title, a.body]);
-                });
-                console.log("Sample content created.");
-            }
-        });
+        // Seed initial data (Imsakia, Content, Playlists)
+        try {
+            require('../load_data').seedDatabase(db);
+        } catch (e) {
+            console.error('Failed to seed database:', e);
+        }
     });
 }
 

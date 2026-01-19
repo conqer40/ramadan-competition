@@ -193,7 +193,7 @@
     <script>
         const API = '/api';
         let currentUser = JSON.parse(localStorage.getItem('user'));
-        
+
         // Ensure user is logged in
         if (!currentUser) {
             window.location.href = '/';
@@ -267,7 +267,7 @@
         function renderTodayChallenge() {
             const day = getDayOfRamadan();
             const challenge = challenges[day - 1];
-            
+
             if (!challenge) {
                 document.getElementById('today-challenge').innerHTML = `<p style="text-align:center; color:white;">رمضان كريم! 🌙</p>`;
                 return;
@@ -344,7 +344,7 @@
             try {
                 const res = await fetch(`${API}/challenges/leaderboard`);
                 const data = await res.json();
-                
+
                 const html = `
                     <div class="stat-card" style="grid-column: 1 / -1; margin-top: 1rem; text-align: right;">
                         <h3 style="color:var(--gold); margin-bottom:1rem; text-align:center;">🏆 ترتيب أبطال التحديات</h3>
@@ -354,7 +354,9 @@
                                     <div class="challenge-item" style="padding:0.75rem;">
                                         <div class="challenge-day" style="font-size:1.2rem; width:35px; height:35px;">${i + 1}</div>
                                         <div class="challenge-info">
-                                            <div class="challenge-name">${u.name}</div>
+                                            ${u.facebook_url
+                        ? `<a href="${u.facebook_url}" target="_blank" class="challenge-name" style="color:var(--gold); text-decoration:underline;">${u.name}</a>`
+                        : `<div class="challenge-name">${u.name}</div>`}
                                         </div>
                                         <div style="font-weight:bold; color:var(--gold);">${u.total_points}</div>
                                     </div>
@@ -363,7 +365,7 @@
                         ` : '<p style="text-align:center;">كن أول من يشارك!</p>'}
                     </div>
                 `;
-                
+
                 // Append to stats grid or creating a new section? 
                 // Let's insert it after stats-grid
                 let lbContainer = document.getElementById('challenges-leaderboard');

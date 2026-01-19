@@ -222,6 +222,7 @@ async function doRegister() {
     const name = document.getElementById('reg-name').value;
     const phone = document.getElementById('reg-phone').value;
     const national_id = document.getElementById('reg-id').value;
+    const facebook_url = document.getElementById('reg-fb').value;
     const password = document.getElementById('reg-pass').value;
     const agreed_terms = document.getElementById('reg-terms').checked;
 
@@ -232,7 +233,7 @@ async function doRegister() {
     const res = await fetch(`${API}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, national_id, password, agreed_terms })
+        body: JSON.stringify({ name, phone, national_id, facebook_url, password, agreed_terms })
     });
 
     const data = await res.json();
