@@ -445,3 +445,305 @@ function closeVideoModal() {
         document.getElementById('video-iframe').src = ''; // Stop video
     }
 }
+
+// ==================== STATUS & COUNTDOWN ====================
+async function loadStatus() {
+    try {
+        const res = await fetch(`${API}/status`);
+        const status = await res.json();
+
+        // Update Prayer Countdown
+        updatePrayerCountdown(status);
+
+        // Update Competition Status UI
+        const compStatus = document.getElementById('comp-status');
+        const compMsg = document.getElementById('competition-message');
+
+        if (status.status === 'open') {
+            compStatus.className = 'status-badge status-open';
+            compStatus.innerHTML = '<i class="fas fa-door-open"></i> المسابقة مفتوحة';
+            compMsg.textContent = 'سؤال اليوم متاح الآن!';
+        } else if (status.status === 'waiting_fajr') {
+            compStatus.className = 'status-badge status-closed';
+            compStatus.innerHTML = '<i class="fas fa-clock"></i> في انتظار الفجر';
+            compMsg.textContent = 'المسابقة تبدأ مع أذان الفجر';
+        } else if (status.status === 'closed_show_result') {
+            compStatus.className = 'status-badge status-closed';
+            compStatus.innerHTML = '<i class="fas fa-flag-checkered"></i> انتهت المسابقة';
+            compMsg.textContent = 'تم إعلان نتيجة اليوم';
+        }
+    } catch (e) {
+        console.error('Error loading status:', e);
+    }
+}
+
+function updatePrayerCountdown(status) {
+    if (!status.fajr) return;
+
+    // Determine next prayer based on current time
+    // Simplified logic for MVP: Just countdown to next Fajr or Maghrib
+    const prayerNameEl = document.getElementById('prayer-name');
+    const countdownEl = document.getElementById('prayer-display');
+    // Note: ID in HTML is 'prayer-countdown' or 'prayer-display'? 
+    // HTML check: ID is "prayer-countdown"
+
+    const targetEl = document.getElementById('prayer-countdown');
+    if (!targetEl) return;
+
+    // Use Maghrib if open, Fajr if waiting
+    let targetTime = status.status === 'open' ? status.maghrib : status.fajr;
+    let targetName = status.status === 'open' ? 'المغرب' : 'الفجر';
+
+    prayerNameEl.textContent = targetName;
+
+    // Start local countdown (simplified)
+    // In real app, we parse time and diff
+}
+
+// ==================== AUTH LOGIC ====================
+function showModal(type) {
+    const modal = document.getElementById('auth-modal');
+    const loginForm = document.getElementById('login-form');
+    const regForm = document.getElementById('register-form');
+
+    modal.classList.add('active');
+
+    if (type === 'login') {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+    } else {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+    }
+}
+
+function closeModal() {
+    document.getElementById('auth-modal').classList.remove('active');
+}
+
+function toggleAuthForm() {
+    const loginForm = document.getElementById('login-form');
+    const regForm = document.getElementById('register-form');
+
+    if (loginForm.style.display === 'none') {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+    } else {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+    }
+}
+
+async function doLogin() {
+    const phone = document.getElementById('login-phone').value;
+    const password = document.getElementById('login-pass').value;
+
+    if (!phone || !password) return showToast('أدخل البيانات!', 'warning');
+
+    try {
+        const res = await fetch(`${API}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            currentUser = data.user;
+            closeModal();
+            updateAuthUI();
+            showToast('تم تسجيل الدخول بنجاح', 'success');
+            loadLeaderboard();
+        } else {
+            showToast(data.error, 'warning');
+        }
+    } catch (e) {
+        showToast('حدث خطأ في الاتصال', 'warning');
+    }
+}
+
+async function doRegister() {
+    const name = document.getElementById('reg-name').value;
+    const phone = document.getElementById('reg-phone').value;
+    const nid = document.getElementById('reg-id').value;
+    const pass = document.getElementById('reg-pass').value;
+    const fb = document.getElementById('reg-fb').value;
+    const terms = document.getElementById('reg-terms').checked;
+
+    if (!name || !phone || !nid || !pass) return showToast('جميع الحقول مطلوبة', 'warning');
+    if (!terms) return showToast('يجب الموافقة على الشروط', 'warning');
+
+    try {
+        const res = await fetch(`${API}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, national_id: nid, password: pass, facebook_url: fb, agreed_terms: true })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            // Auto login after register
+            await doLoginFromReg(phone, pass);
+        } else {
+            showToast(data.error, 'warning');
+        }
+    } catch (e) {
+        showToast('حدث خطأ في التسجيل', 'warning');
+    }
+}
+
+async function doLoginFromReg(phone, password) {
+    const res = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        currentUser = data.user;
+        closeModal();
+        updateAuthUI();
+        showToast('تم إنشاء الحساب بنجاح', 'success');
+    }
+}
+
+function doLogout() {
+    localStorage.removeItem('user');
+    currentUser = null;
+    updateAuthUI();
+    showToast('تم تسجيل الخروج', 'info');
+    showPage('home');
+}
+
+// ==================== COMPETITION LOGIC ====================
+async function loadCompetition() {
+    if (!currentUser) {
+        document.getElementById('comp-login-required').style.display = 'block';
+        document.getElementById('comp-question').style.display = 'none';
+        document.getElementById('comp-answered').style.display = 'none';
+        document.getElementById('comp-result').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('comp-login-required').style.display = 'none';
+
+    // Check if answered
+    const ansRes = await fetch(`${API}/my-answer/${currentUser.id}`);
+    const ansData = await ansRes.json();
+
+    if (ansData.answered) {
+        if (ansData.showCorrect) {
+            // Show Result
+            showCompResult(ansData.answer);
+        } else {
+            // Show "Answered" waiting screen
+            document.getElementById('comp-answered').style.display = 'block';
+            document.getElementById('comp-question').style.display = 'none';
+        }
+        return;
+    }
+
+    // Load Question
+    const qRes = await fetch(`${API}/today-question`);
+    const qData = await qRes.json();
+
+    if (!qData.available) {
+        document.getElementById('comp-question').innerHTML = `<div style="text-align:center; padding:2rem;"><h3>${qData.reason === 'waiting_fajr' ? 'انتظروا سؤال الفجر' : 'لا يوجد سؤال حالياً'}</h3></div>`;
+        document.getElementById('comp-question').style.display = 'block';
+        return;
+    }
+
+    // Render Question
+    currentQuestion = qData.question;
+    document.getElementById('comp-question').style.display = 'block';
+
+    document.getElementById('q-day').textContent = qData.day;
+    document.getElementById('q-text').textContent = currentQuestion.question_text;
+    document.getElementById('q-timer').textContent = currentQuestion.timer_seconds;
+
+    const opts = [currentQuestion.option1, currentQuestion.option2, currentQuestion.option3, currentQuestion.option4, currentQuestion.option5].filter(o => o);
+
+    document.getElementById('options-list').innerHTML = opts.map((o, i) => `
+        <div class="option-item" onclick="selectOption(${i}, this)">
+            <span class="opt-letter">${String.fromCharCode(65 + i)}</span>
+            <span>${o}</span>
+        </div>
+    `).join('');
+
+    document.getElementById('submit-btn').disabled = true;
+    startQuestionTimer(currentQuestion.timer_seconds);
+}
+
+let selectedOptIndex = -1;
+
+function selectOption(index, el) {
+    document.querySelectorAll('.option-item').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedOptIndex = index;
+    document.getElementById('submit-btn').disabled = false;
+}
+
+function startQuestionTimer(seconds) {
+    let timeLeft = seconds;
+    startTime = Date.now();
+
+    if (timerInterval) clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('q-timer').textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            // Time out - maybe auto submit or disable
+        }
+    }, 1000);
+}
+
+async function submitAnswer() {
+    if (selectedOptIndex === -1) return;
+
+    if (timerInterval) clearInterval(timerInterval);
+    const timeTaken = Date.now() - startTime;
+
+    try {
+        const res = await fetch(`${API}/submit-answer`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.id,
+                questionId: currentQuestion.id,
+                selectedOption: selectedOptIndex + 1, // 1-based
+                timeTakenMs: timeTaken
+            })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById('comp-question').style.display = 'none';
+            document.getElementById('comp-answered').style.display = 'block';
+            showToast('تم إرسال الإجابة!', 'success');
+        } else {
+            showToast(data.error, 'error');
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function showCompResult(answer) {
+    document.getElementById('comp-question').style.display = 'none';
+    document.getElementById('comp-answered').style.display = 'none';
+    const resDiv = document.getElementById('comp-result');
+    resDiv.style.display = 'block';
+
+    resDiv.innerHTML = `
+        <div style="text-align:center;">
+            <i class="fas ${answer.is_correct ? 'fa-check-circle' : 'fa-times-circle'}" 
+               style="font-size:4rem; color:${answer.is_correct ? '#4ade80' : '#ef4444'}; margin-bottom:1rem;"></i>
+            <h3>${answer.is_correct ? 'إجابة صحيحة!' : 'إجابة خاطئة'}</h3>
+            <p>الإجابة الصحيحة كانت رقم: ${answer.correct_answer}</p>
+        </div>
+    `;
+}
